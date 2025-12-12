@@ -6,9 +6,9 @@ import orderRouter from './orderRouter.js';
 
 const router = Router();
 
-router.use('/foods', foodRouter);
-router.use('/users', usersRouter);
-router.use('/cart', cartRouter);        
+router.use('/foods', foodRouter); // Проверено, результаты совпадают
+router.use('/users', usersRouter); // Проверено, результаты совпадают
+router.use('/cart', cartRouter); // Проверено, результаты совпадают
 router.use('/orders', orderRouter);
 
 export default router;

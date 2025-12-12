@@ -1,10 +1,10 @@
-export interface CartItem {
+export interface FoodItem {
     foodId: string;
     quantity: number;
     price: number;
 }
 
 export interface Cart {
-    
-    items: CartItem[];
+    userId: string;
+    foods: FoodItem[];
 }

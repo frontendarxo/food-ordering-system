@@ -2,8 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../modules/userSchema.js";
-
-const JWT_SECRET = process.env.JWT_SECRET as string;
+import { JWT_SECRET } from "../utils/jwt.js";
 
 export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -20,7 +19,6 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await User.create({ name, number, password: hashedPassword });
-        
         const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
         
         res.status(201).json({ 

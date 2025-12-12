@@ -21,8 +21,6 @@ const userSchema = new Schema({
     },
     number: {
         type: Number,
-        min: 11,
-        max: 11,
         required: true,
         unique: true
     },

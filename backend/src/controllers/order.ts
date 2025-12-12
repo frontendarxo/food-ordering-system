@@ -8,7 +8,11 @@ import { NotFoundError } from "../errors/notFoundError.js";
 
 export const createOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const user = await User.findById(req.userId).populate('cart.food');
+        if (!req.userId) {
+            return res.status(401).json({ message: 'Пользователь не авторизован' });
+        }
+
+        const user = await User.findById(req.userId);
         if (!user) {
             return res.status(404).json({ message: 'Пользователь не найден' });
         }
@@ -17,12 +21,13 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
             return res.status(400).json({ message: 'Корзина пуста' });
         }
 
-        const populatedFoods = await Food.find({
-            _id: { $in: user.cart.map(item => item.food) }
-        });
+        const foodIds = user.cart.map(item => item.food);
+        const foods = await Food.find({ _id: { $in: foodIds } });
+
+        const foodMap = new Map(foods.map(food => [food._id.toString(), food]));
 
         const orderItems = user.cart.map(cartItem => {
-            const food = populatedFoods.find(f => f._id.toString() === cartItem.food.toString());
+            const food = foodMap.get(cartItem.food.toString());
             if (!food) {
                 throw new NotFoundError(`Еда с ID ${cartItem.food} не найдена`);
             }
@@ -38,13 +43,13 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
             0
         );
 
-        const order = await Order.create({
-            user: req.userId as any,
+        const order = new Order({
+            user: new mongoose.Types.ObjectId(req.userId),
             items: orderItems,
             total
         });
+        await order.save();
 
-        // Fix: reset Mongoose DocumentArray correctly
         user.cart.splice(0, user.cart.length);
         await user.save();
 
@@ -62,8 +67,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
 
 export const getUserOrders = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const userId = new mongoose.Types.ObjectId(req.userId);
-        const orders = await Order.find({ user: userId })
+        const orders = await Order.find({ user: req.userId })
             .populate('items.food')
             .sort({ createdAt: -1 });
 
@@ -76,11 +80,10 @@ export const getUserOrders = async (req: AuthRequest, res: Response, next: NextF
 export const getOrderById = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const { orderId } = req.params;
-        const userId = new mongoose.Types.ObjectId(req.userId);
 
         const order = await Order.findOne({ 
             _id: orderId, 
-            user: userId 
+            user: req.userId 
         })
             .populate('items.food')
             .populate('user', 'name number');

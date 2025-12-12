@@ -1,15 +1,21 @@
 import path from 'path';
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import mongoose from 'mongoose';
 import { fileURLToPath } from 'url';
-import { handleError } from './middlewares/handleError.js';
-import router from './routers/index.js';
+import dotenv from 'dotenv';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
+if (!process.env.JWT_SECRET) {
+    console.error('ОШИБКА: JWT_SECRET не установлен в переменных окружения');
+    process.exit(1);
+}
+
+import express from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
+import { handleError } from './middlewares/handleError.js';
+import router from './routers/index.js';
 
 const app = express();
 
