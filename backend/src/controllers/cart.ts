@@ -2,6 +2,8 @@ import type { NextFunction, Response } from "express";
 import User from "../modules/userSchema.js";    
 import Food from "../modules/FoodSchema.js";
 import type { AuthRequest } from "../middlewares/auth.ts";
+import { NotFoundError } from "../errors/not-found.js";
+import { BadRequestError } from "../errors/bad-request.js";
 
 export const getCart = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
@@ -22,12 +24,12 @@ export const addToCart = async (req: AuthRequest, res: Response, next: NextFunct
 
         const food = await Food.findById(foodId);
         if (!food) {
-            return res.status(404).json({ message: 'Еда не найдена' });
+            throw new NotFoundError('Еда не найдена');
         }
 
         const user = await User.findById(req.userId);
         if (!user) {
-            return res.status(404).json({ message: 'Пользователь не найден' });
+            throw new NotFoundError('Пользователь не найден');
         }
 
         const existingItemIndex = user.cart.findIndex(
@@ -55,12 +57,12 @@ export const updateCartItem = async (req: AuthRequest, res: Response, next: Next
         const { quantity } = req.body;
 
         if (!quantity || quantity < 1) {
-            return res.status(400).json({ message: 'Количество должно быть больше 0' });
+            throw new BadRequestError('Количество должно быть больше 0');
         }
 
         const user = await User.findById(req.userId);
         if (!user) {
-            return res.status(404).json({ message: 'Пользователь не найден' });
+            throw new NotFoundError('Пользователь не найден');
         }
 
         const itemIndex = user.cart.findIndex(
@@ -68,7 +70,7 @@ export const updateCartItem = async (req: AuthRequest, res: Response, next: Next
         );
 
         if (itemIndex === -1) {
-            return res.status(404).json({ message: 'Товар не найден в корзине' });
+            throw new NotFoundError('Товар не найден в корзине');
         }
 
         user.cart[itemIndex]!.quantity = quantity;
@@ -87,7 +89,7 @@ export const removeFromCart = async (req: AuthRequest, res: Response, next: Next
 
         const user = await User.findById(req.userId);
         if (!user) {
-            return res.status(404).json({ message: 'Пользователь не найден' });
+            throw new NotFoundError('Пользователь не найден');
         }
 
         const itemIndex = user.cart.findIndex(
@@ -95,7 +97,7 @@ export const removeFromCart = async (req: AuthRequest, res: Response, next: Next
         );
 
         if (itemIndex === -1) {
-            return res.status(404).json({ message: 'Товар не найден в корзине' });
+            throw new NotFoundError('Товар не найден в корзине');
         }
 
         user.cart.splice(itemIndex, 1);
@@ -113,7 +115,7 @@ export const clearCart = async (req: AuthRequest, res: Response, next: NextFunct
     try {
         const user = await User.findById(req.userId);
         if (!user) {
-            return res.status(404).json({ message: 'Пользователь не найден' });
+            throw new NotFoundError('Пользователь не найден');
         }
 
         user.cart.splice(0, user.cart.length);

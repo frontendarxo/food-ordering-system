@@ -17,16 +17,32 @@ const cartItemSchema = new Schema({
 const userSchema = new Schema({
     name: {
         type: String,
-        required: true
+        required: true,
+        minlength: [4, 'Имя должно быть не менее 4 символов']
     },
     number: {
         type: Number,
-        required: true,
-        unique: true
+        required: [true, 'Вы не ввели номер'],
+        unique: [true, 'Такой номер уже занят'],
+        validate: {
+            validator: function(v: number) {
+                const phoneRegex = /^(?:\+7|8)\s?\(?\d{3}\)?[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}$/;
+                const numberStr = v.toString();
+                return numberStr.length === 11 && phoneRegex.test(numberStr);
+            },
+            message: 'Номер должен соответствовать формату'
+        }
     },
     password: {
         type: String,
-        required: true
+        required: [true, 'Вы не ввели пароль'],
+        minlength: [6, 'Пароль должен быть не менее 6 символов'],
+        validate: {
+            validator: function(v: string) {
+                return /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]+$/.test(v);
+            },
+            message: 'Пароль должен содержать только английские символы'
+        }
     },
     cart: {
         type: [cartItemSchema],

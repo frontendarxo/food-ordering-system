@@ -4,21 +4,23 @@ import User from "../modules/userSchema.js";
 import Order from "../modules/orderSchema.js";
 import Food from "../modules/FoodSchema.js";
 import type { AuthRequest } from "../middlewares/auth.js";
-import { NotFoundError } from "../errors/notFoundError.js";
+import { NotFoundError } from "../errors/not-found.js";
+import { BadRequestError } from "../errors/bad-request.js";
+import { UnauthorizedError } from "../errors/unauthorized.js";
 
 export const createOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         if (!req.userId) {
-            return res.status(401).json({ message: 'Пользователь не авторизован' });
+            throw new UnauthorizedError('Пользователь не авторизован');
         }
 
         const user = await User.findById(req.userId);
         if (!user) {
-            return res.status(404).json({ message: 'Пользователь не найден' });
+            throw new NotFoundError('Пользователь не найден');
         }
 
         if (user.cart.length === 0) {
-            return res.status(400).json({ message: 'Корзина пуста' });
+            throw new BadRequestError('Корзина пуста');
         }
 
         const foodIds = user.cart.map(item => item.food);

@@ -1,14 +1,19 @@
 import type { NextFunction, Request, Response } from "express";
-import { AppError } from "../errors/appError.js";
+import { Error } from "mongoose";
+import { AppError } from "../errors/app-error.js";
 
 export const handleError = (err: Error, req: Request, res: Response, next: NextFunction) => {
-    console.error(err.stack);
-    // Check for mongoose ValidationError type properly
-    if ((err as any)?.name === 'ValidationError') {
-        return res.status(400).json({ message: err.message });
+
+
+    if (err instanceof Error.ValidationError) {
+        return res.status(400).json({
+            message: Object.values(err.errors)
+                .map(e => e.message)
+                .join(', ')
+        });
     }
     if (err instanceof AppError) {      
         return res.status(err.statusCode).json({ message: err.message });
     }
-    res.status(500).json({ message: 'Something broke!' });
+    res.status(500).json({ message: 'Ошибка сервера' });
 }
