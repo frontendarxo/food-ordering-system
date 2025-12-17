@@ -37,6 +37,7 @@ const userSchema = new Schema({
         type: String,
         required: [true, 'Вы не ввели пароль'],
         minlength: [6, 'Пароль должен быть не менее 6 символов'],
+        select: false,
         validate: {
             validator: function(v: string) {
                 return /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]+$/.test(v);
@@ -44,11 +45,26 @@ const userSchema = new Schema({
             message: 'Пароль должен содержать только английские символы'
         }
     },
+    adress: {
+        type: String,
+        required: true,
+        minlength: [5, 'Адрес должен быть не менее 10 символов']
+    },
     cart: {
         type: [cartItemSchema],
         default: []
     }
-}, { timestamps: true });
+}, 
+{ 
+    toJSON: { 
+        transform: function(_doc, ret: any) { 
+            delete ret.password;
+            return ret;
+        } 
+    }, 
+    toObject: { virtuals: true }, 
+    timestamps: true  
+});
 
 const User = model('User', userSchema);
 

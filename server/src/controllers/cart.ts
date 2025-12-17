@@ -9,9 +9,8 @@ export const getCart = async (req: AuthRequest, res: Response, next: NextFunctio
     try {
         const user = await User.findById(req.userId).populate('cart.food');
         if (!user) {
-            return res.status(404).json({ message: 'Пользователь не найден' });
+            throw new NotFoundError('Пользователь не найден');
         }
-
         res.json({ cart: user.cart });
     } catch (error) {
         next(error);
@@ -53,8 +52,11 @@ export const addToCart = async (req: AuthRequest, res: Response, next: NextFunct
 
 export const updateCartItem = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const { foodId } = req.params;
-        const { quantity } = req.body;
+        const { foodId, quantity } = req.body;
+
+        if (!foodId) {
+            throw new BadRequestError('ID еды обязателен');
+        }
 
         if (!quantity || quantity < 1) {
             throw new BadRequestError('Количество должно быть больше 0');
@@ -85,7 +87,11 @@ export const updateCartItem = async (req: AuthRequest, res: Response, next: Next
 
 export const removeFromCart = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const { foodId } = req.params;
+        const { foodId } = req.body;
+
+        if (!foodId) {
+            throw new BadRequestError('ID еды обязателен');
+        }
 
         const user = await User.findById(req.userId);
         if (!user) {

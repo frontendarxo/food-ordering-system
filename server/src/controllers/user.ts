@@ -9,9 +9,9 @@ import { UnauthorizedError } from "../errors/unauthorized.js";
 
 export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { name, number, password } = req.body;
+        const { name, number, password, adress } = req.body;
         
-        if (!name || !number || !password) {
+        if (!name || !number || !password || !adress) {
             throw new BadRequestError('Все поля обязательны');
         }
 
@@ -30,9 +30,8 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await User.create({ name, number, password: hashedPassword });
+        const user = await User.create({ name, number, password: hashedPassword, adress });
         const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
-        
         res.status(201).json({ 
             message: 'Пользователь успешно зарегистрирован', 
             token,

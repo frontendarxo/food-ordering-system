@@ -1,10 +1,7 @@
-export interface FoodItem {
-    foodId: string;
-    quantity: number;
-    price: number;
-}
+import type { CartItem } from './food';
 
-export interface Cart {
-    userId: string;
-    foods: FoodItem[];
+export interface CartState {
+  items: CartItem[];
+  isLoading: boolean;
+  error: string | null;
 }

@@ -12,10 +12,10 @@ const router = Router();
 
 router.use(authenticate);
 
-router.get('/', getCart); // 100
-router.post('/', addToCart); // 100
-router.put('/:foodId', updateCartItem); // 100
-router.delete('/:foodId', removeFromCart); // 100
-router.delete('/', clearCart); // 100
+router.get('/', getCart);
+router.post('/', addToCart);
+router.put('/', updateCartItem);
+router.delete('/', removeFromCart);
+router.delete('/clear', clearCart);
 
 export default router;
