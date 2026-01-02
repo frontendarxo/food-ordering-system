@@ -32,6 +32,11 @@ const orderSchema = new Schema({
         required: true,
         min: 0
     },
+    address: {
+        type: String,
+        required: true,
+        minlength: [5, 'Адрес должен быть не менее 5 символов']
+    },
     status: {
         type: String,
         enum: ['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'],

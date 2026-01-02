@@ -8,10 +8,10 @@ export const useRegister = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
-  const handleRegister = async (name: string, number: string, password: string, adress: string) => {
+  const handleRegister = async (name: string, number: string, password: string) => {
     try {
       setError(null);
-      await dispatch(register({ name, number, password, adress })).unwrap();
+      await dispatch(register({ name, number, password })).unwrap();
       navigate('/');
     } catch (err: unknown) {
       // Redux Toolkit сериализует ошибки, поэтому они теряют прототип Error

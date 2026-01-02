@@ -15,6 +15,7 @@ export interface Order {
   };
   items: OrderItem[];
   total: number;
+  address: string;
   status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
   created_at: string;
   formatted_created_at?: string;

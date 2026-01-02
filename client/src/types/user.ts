@@ -2,14 +2,12 @@ export interface User {
   id: string;
   name: string;
   number: string;
-  adress: string;
 }
 
 export interface RegisterData {
   name: string;
   number: string;
   password: string;
-  adress: string;
 }
 
 export interface LoginCredentials {

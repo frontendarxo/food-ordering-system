@@ -8,7 +8,6 @@ interface IUserDocument extends Document {
     name: string;
     number: number;
     password: string;
-    adress: string;
     cart: Array<{
         food: Schema.Types.ObjectId;
         quantity: number;
@@ -63,11 +62,6 @@ const userSchema = new Schema({
             },
             message: 'Пароль должен содержать только английские символы'
         }
-    },
-    adress: {
-        type: String,
-        required: true,
-        minlength: [5, 'Адрес должен быть не менее 5 символов']
     },
     cart: {
         type: [cartItemSchema],

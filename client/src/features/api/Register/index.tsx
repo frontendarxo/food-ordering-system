@@ -10,7 +10,6 @@ export const Register = () => {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
   const [password, setPassword] = useState('');
-  const [adress, setAdress] = useState('');
   const { handleRegister, error } = useRegister();
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,13 +49,9 @@ export const Register = () => {
     setPassword(e.target.value);
   };
 
-  const handleAdressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAdress(e.target.value);
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await handleRegister(name, number, password, adress);
+    await handleRegister(name, number, password);
   };
 
   return (
@@ -85,13 +80,6 @@ export const Register = () => {
           id="password"
           value={password}
           onChange={handlePasswordChange}
-        />
-        <Field
-          label="Адрес"
-          type="text"
-          id="adress"
-          value={adress}
-          onChange={handleAdressChange}
         />
         <Button type="submit">Зарегистрироваться</Button>
         <div className="register-link">

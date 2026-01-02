@@ -31,11 +31,12 @@ export const getOrderById = async (orderId: string) => {
     return response.json();
 };
 
-export const createOrder = async () => {
+export const createOrder = async (address: string) => {
     const response = await fetch(`${BASE_URL}/orders`, {
         method: 'POST',
         headers: getHeaders(),
-        credentials: 'include'
+        credentials: 'include',
+        body: JSON.stringify({ address })
     });
     
     if (!response.ok) {

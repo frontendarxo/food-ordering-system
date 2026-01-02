@@ -10,6 +10,11 @@ import { UnauthorizedError } from "../errors/unauthorized.js";
 
 export const createOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
+        const { address } = req.body;
+        
+        if (!address || address.trim().length < 5) {
+            throw new BadRequestError('Адрес обязателен и должен быть не менее 5 символов');
+        }
 
         const userId = res.locals.userId;
         const user = await User.findById(userId as string);
@@ -46,7 +51,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         const order = new Order({
             user: new mongoose.Types.ObjectId(req.userId),
             items: orderItems,
-            total
+            total,
+            address: address.trim()
         });
         await order.save();
 

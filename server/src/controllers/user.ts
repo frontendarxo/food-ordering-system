@@ -6,8 +6,8 @@ import { UnauthorizedError } from "../errors/unauthorized.js";
 
 export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { name, number, password, adress } = req.body;
-        if (!name || !number || !password || !adress) {
+        const { name, number, password } = req.body;
+        if (!name || !number || !password) {
             return next(new BadRequestError('Все поля обязательны'))
         }
         
@@ -34,16 +34,12 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
             return next(new BadRequestError('Пароль должен содержать только английские символы'))
         }
         
-        if (adress.length < 5) {
-            return next(new BadRequestError('Адрес должен быть не менее 5 символов'))
-        }
-        
         const existingUser = await User.findOne({ number: numberValue });
         if (existingUser) {
             return next(new ConflictError('Пользователь с таким номером уже существует'))
         }
         
-        const user = await User.create({ name, number: numberValue, password, adress });
+        const user = await User.create({ name, number: numberValue, password });
         const token = user.generateAuthToken();
 
         res.status(201)
