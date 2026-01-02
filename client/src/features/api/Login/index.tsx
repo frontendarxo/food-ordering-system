@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Title } from '../../../shared/title';
 import { Button } from '../../../shared/button';
 import { Field } from '../../../shared/field';
+import { PasswordField } from '../../../shared/password-field';
 import { useLogin } from './model';
 import './style.css';
 
@@ -62,9 +63,8 @@ export const Login = () => {
           onChange={handleNumberChange}
           onFocus={handleNumberFocus}
         />
-        <Field
+        <PasswordField
           label="Пароль"
-          type="password"
           id="password"
           value={password}
           onChange={handlePasswordChange}

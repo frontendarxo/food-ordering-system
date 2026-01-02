@@ -6,6 +6,7 @@ import { Register } from '../../features/api/Register';
 import { Cart } from '../../features/api/cart';
 import { Home } from '../../pages/Home';
 import { Orders } from '../../pages/Orders';
+import { Profile } from '../../pages/Profile';
 import { PrivateRoute } from '../../shared/PrivateRoute';
 
 export const AppRouter = () => {
@@ -26,6 +27,14 @@ export const AppRouter = () => {
           element={
             <PrivateRoute>
               <Orders />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="profile"
+          element={
+            <PrivateRoute>
+              <Profile />
             </PrivateRoute>
           }
         />

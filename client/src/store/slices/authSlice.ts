@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import { loginUser, registerUser, getCurrentUser, logoutUser } from '../../api/auth';
+import { loginUser, registerUser, getCurrentUser, logoutUser, updateUserName, updateUserPassword } from '../../api/auth';
 import type { User, AuthState, LoginCredentials, RegisterData } from '../../types/user';
 
 const initialState: AuthState & { isLoading: boolean; error: string | null } = {
@@ -39,6 +39,22 @@ export const logout = createAsyncThunk(
   'auth/logout',
   async () => {
     await logoutUser();
+  }
+);
+
+export const updateName = createAsyncThunk(
+  'auth/updateName',
+  async (name: string) => {
+    const response = await updateUserName(name);
+    return response;
+  }
+);
+
+export const updatePassword = createAsyncThunk(
+  'auth/updatePassword',
+  async ({ currentPassword, newPassword }: { currentPassword: string; newPassword: string }) => {
+    const response = await updateUserPassword(currentPassword, newPassword);
+    return response;
   }
 );
 
@@ -100,6 +116,30 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
+      })
+      .addCase(updateName.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateName.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+      })
+      .addCase(updateName.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || 'Ошибка обновления имени';
+      })
+      .addCase(updatePassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updatePassword.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+      })
+      .addCase(updatePassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || 'Ошибка обновления пароля';
       });
   },
 });

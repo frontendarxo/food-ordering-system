@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Title } from '../../../shared/title';
 import { Button } from '../../../shared/button';
 import { Field } from '../../../shared/field';
+import { PasswordField } from '../../../shared/password-field';
 import { useRegister } from './model';
 import './style.css';
 
@@ -10,6 +11,8 @@ export const Register = () => {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const { handleRegister, error } = useRegister();
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,10 +50,28 @@ export const Register = () => {
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
+    setPasswordError('');
+  };
+
+  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setConfirmPassword(e.target.value);
+    setPasswordError('');
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setPasswordError('');
+
+    if (password !== confirmPassword) {
+      setPasswordError('Пароли не совпадают');
+      return;
+    }
+
+    if (!password || !confirmPassword) {
+      setPasswordError('Пароль обязателен');
+      return;
+    }
+
     await handleRegister(name, number, password);
   };
 
@@ -59,6 +80,7 @@ export const Register = () => {
       <Title level={2}>Регистрация</Title>
       <form onSubmit={handleSubmit} className="register-form">
         {error && <div className="error-message">{error}</div>}
+        {passwordError && <div className="error-message">{passwordError}</div>}
         <Field
           label="Имя"
           type="text"
@@ -74,12 +96,17 @@ export const Register = () => {
           onChange={handleNumberChange}
           onFocus={handleNumberFocus}
         />
-        <Field
+        <PasswordField
           label="Пароль"
-          type="password"
           id="password"
           value={password}
           onChange={handlePasswordChange}
+        />
+        <PasswordField
+          label="Подтвердите пароль"
+          id="confirmPassword"
+          value={confirmPassword}
+          onChange={handleConfirmPasswordChange}
         />
         <Button type="submit">Зарегистрироваться</Button>
         <div className="register-link">

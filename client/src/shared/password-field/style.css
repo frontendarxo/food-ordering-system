@@ -1,0 +1,76 @@
+.password-field-wrapper {
+  width: 100%;
+}
+
+.password-field-wrapper label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.password-field-wrapper label span {
+  color: white;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.password-input-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-input-container input {
+  padding: 0.875rem 1rem;
+  padding-right: 3rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 1rem;
+  font-family: 'Montserrat', sans-serif;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.password-input-container input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.password-input-container input:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.password-toggle {
+  position: absolute;
+  width: 30px;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 0.2s ease;
+  z-index: 1;
+}
+
+.password-toggle:hover {
+    background-color: #8A1538;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+
+
+/* Убираем стандартные стили кнопки */
+.password-toggle {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+

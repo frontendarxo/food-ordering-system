@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import bcrypt from "bcryptjs";
 import User from "../modules/userSchema.js";
 import { BadRequestError } from "../errors/bad-request.js";
 import { ConflictError } from "../errors/conflict.js";
@@ -116,6 +117,78 @@ export const logoutUser = async (req: Request, res: Response, next: NextFunction
             sameSite: 'lax',
         })
         .json({ message: 'Выход выполнен успешно' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const updateUserName = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = res.locals.userId;
+        const { name } = req.body;
+        
+        if (!name) {
+            return next(new BadRequestError('Имя обязательно'));
+        }
+        
+        if (name.length < 4) {
+            return next(new BadRequestError('Имя должно быть не менее 4 символов'));
+        }
+        
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { name },
+            { new: true, runValidators: true }
+        );
+        
+        if (!user) {
+            return next(new UnauthorizedError('Пользователь не найден'));
+        }
+        
+        res.json({
+            message: 'Имя успешно обновлено',
+            user: { id: user._id, name: user.name, number: user.number }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const updateUserPassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = res.locals.userId;
+        const { currentPassword, newPassword } = req.body;
+        
+        if (!currentPassword || !newPassword) {
+            return next(new BadRequestError('Текущий и новый пароль обязательны'));
+        }
+        
+        if (newPassword.length < 6) {
+            return next(new BadRequestError('Пароль должен быть не менее 6 символов'));
+        }
+        
+        const passwordRegex = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]+$/;
+        if (!passwordRegex.test(newPassword)) {
+            return next(new BadRequestError('Пароль должен содержать только английские символы'));
+        }
+        
+        const user = await User.findById(userId).select('+password');
+        if (!user) {
+            return next(new UnauthorizedError('Пользователь не найден'));
+        }
+        
+        const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+        if (!isPasswordValid) {
+            return next(new UnauthorizedError('Неверный текущий пароль'));
+        }
+        
+        user.password = newPassword;
+        await user.save();
+        
+        res.json({
+            message: 'Пароль успешно обновлен',
+            user: { id: user._id, name: user.name, number: user.number }
+        });
     } catch (error) {
         next(error);
     }

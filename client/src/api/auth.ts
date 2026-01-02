@@ -57,3 +57,35 @@ export const logoutUser = async () => {
     }
     return response.json();
 };
+
+export const updateUserName = async (name: string) => {
+    const response = await fetch(`${BASE_URL}/auth/update-name`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ name })
+    });
+    
+    if (!response.ok) {
+        await handleApiError(response, 'Ошибка обновления имени');
+    }
+    return response.json();
+};
+
+export const updateUserPassword = async (currentPassword: string, newPassword: string) => {
+    const response = await fetch(`${BASE_URL}/auth/update-password`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ currentPassword, newPassword })
+    });
+    
+    if (!response.ok) {
+        await handleApiError(response, 'Ошибка обновления пароля');
+    }
+    return response.json();
+};

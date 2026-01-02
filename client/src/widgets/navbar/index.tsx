@@ -29,6 +29,9 @@ export const Navbar = () => {
               <li>
                 <Link to="/orders">Заказы</Link>
               </li>
+              <li>
+                <Link to="/profile">Профиль</Link>
+              </li>
               <li className="navbar-user">
                 <span>{user?.name}</span>
                 <button onClick={handleLogout} className="navbar-logout">
