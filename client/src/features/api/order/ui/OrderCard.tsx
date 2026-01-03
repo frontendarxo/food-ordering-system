@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Order } from '../../../../types/order';
 import { formatPrice } from '../../cart/lib';
 import './style.css';
@@ -31,6 +32,8 @@ const getStatusIcon = (status: Order['status']): string => {
 };
 
 export const OrderCard = ({ order }: OrderCardProps) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   if (!order || !order._id) {
     return null;
   }
@@ -39,6 +42,10 @@ export const OrderCard = ({ order }: OrderCardProps) => {
   const totalItems = order.items?.reduce((sum, item) => sum + (item?.quantity || 0), 0) || 0;
   const orderId = order._id ? order._id.slice(-6) : 'N/A';
   const address = order.address || 'Адрес не указан';
+
+  const toggleDetails = () => {
+    setIsExpanded(!isExpanded);
+  };
 
   return (
     <div className="order-card">
@@ -58,35 +65,51 @@ export const OrderCard = ({ order }: OrderCardProps) => {
         </span>
       </div>
 
-      <div className="order-card-address">
-        <span className="order-card-address-label">📍 Адрес доставки:</span>
-        <span className="order-card-address-value">{address}</span>
+      <div className="order-card-summary">
+        <div className="order-card-footer">
+          <span className="order-card-total-label">Итого:</span>
+          <span className="order-card-total">{formatPrice(order.total || 0)}</span>
+        </div>
+        <button
+          className="order-card-toggle"
+          onClick={toggleDetails}
+          aria-expanded={isExpanded}
+        >
+          <span className="order-card-toggle-text">
+            {isExpanded ? 'Скрыть детали' : 'Показать детали'}
+          </span>
+          <span className={`order-card-toggle-icon ${isExpanded ? 'expanded' : ''}`}>▼</span>
+        </button>
       </div>
 
-      <div className="order-card-items">
-        <div className="order-card-items-header">Состав заказа:</div>
-        {order.items?.map((item, index) => {
-          if (!item || !item.food) {
-            return null;
-          }
-          return (
-            <div key={index} className="order-card-item">
-              <div className="order-card-item-info">
-                <span className="order-card-item-name">{item.food.name || 'Неизвестный товар'}</span>
-                <span className="order-card-item-quantity">x{item.quantity || 0}</span>
-              </div>
-              <span className="order-card-item-price">
-                {formatPrice((item.price || 0) * (item.quantity || 0))}
-              </span>
-            </div>
-          );
-        })}
-      </div>
+      {isExpanded && (
+        <div className="order-card-details">
+          <div className="order-card-address">
+            <span className="order-card-address-label">📍 Адрес доставки:</span>
+            <span className="order-card-address-value">{address}</span>
+          </div>
 
-      <div className="order-card-footer">
-        <span className="order-card-total-label">Итого:</span>
-        <span className="order-card-total">{formatPrice(order.total || 0)}</span>
-      </div>
+          <div className="order-card-items">
+            <div className="order-card-items-header">Состав заказа:</div>
+            {order.items?.map((item, index) => {
+              if (!item || !item.food) {
+                return null;
+              }
+              return (
+                <div key={index} className="order-card-item">
+                  <div className="order-card-item-info">
+                    <span className="order-card-item-name">{item.food.name || 'Неизвестный товар'}</span>
+                    <span className="order-card-item-quantity">x{item.quantity || 0}</span>
+                  </div>
+                  <span className="order-card-item-price">
+                    {formatPrice((item.price || 0) * (item.quantity || 0))}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
