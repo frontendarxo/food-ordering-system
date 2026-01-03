@@ -8,25 +8,14 @@ button {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
   max-width: 100%;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-button:hover {
-  background-color: #ffed4e;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
 button:active {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
-/* 
-button:focus {
-  outline-offset: 2px;
-  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
-} */
 
 button:disabled {
   opacity: 0.6;
