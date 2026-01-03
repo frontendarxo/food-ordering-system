@@ -2,6 +2,7 @@
   background-color: rgba(255, 255, 255, 0.1);
   padding: 1rem 2rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
 }
 
 .navbar-container {
@@ -17,6 +18,38 @@
   font-weight: 700;
   color: white;
   text-decoration: none;
+  z-index: 1000;
+}
+
+.navbar-burger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  z-index: 1001;
+}
+
+.navbar-burger span {
+  width: 25px;
+  height: 3px;
+  background-color: white;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.navbar-burger.active span:nth-child(1) {
+  transform: rotate(45deg) translate(8px, 8px);
+}
+
+.navbar-burger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.navbar-burger.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
 }
 
 .navbar-menu {
@@ -66,5 +99,60 @@
 
 .navbar-logout:hover {
   background-color: rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 1rem;
+  }
+
+  .navbar-burger {
+    display: flex;
+  }
+
+  .navbar-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 70%;
+    max-width: 300px;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.95);
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 5rem 2rem 2rem;
+    gap: 1.5rem;
+    transition: right 0.3s ease;
+    z-index: 1000;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5);
+  }
+
+  .navbar-menu.active {
+    right: 0;
+  }
+
+  .navbar-menu li {
+    width: 100%;
+  }
+
+  .navbar-menu a {
+    display: block;
+    padding: 0.75rem 0;
+    font-size: 1.1rem;
+  }
+
+  .navbar-user {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    width: 100%;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .navbar-logout {
+    width: 100%;
+  }
 }
 
