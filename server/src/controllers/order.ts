@@ -1,37 +1,51 @@
-import type { NextFunction, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
-import User from "../modules/userSchema.js";
 import Order from "../modules/orderSchema.js";
 import Food from "../modules/FoodSchema.js";
-import type { AuthRequest } from "../middlewares/auth.js";
 import { NotFoundError } from "../errors/not-found.js";
 import { BadRequestError } from "../errors/bad-request.js";
 
-export const createOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
+interface OrderItem {
+    food: string;
+    quantity: number;
+}
+
+export const createOrder = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { address } = req.body;
+        const { phoneNumber, items, deliveryMethod, address, paymentMethod } = req.body;
         
-        if (!address || address.trim().length < 5) {
-            throw new BadRequestError('Адрес обязателен и должен быть не менее 5 символов');
+        if (!phoneNumber) {
+            throw new BadRequestError('Номер телефона обязателен');
         }
 
-        const userId = res.locals.userId;
-        const user = await User.findById(userId as string);
-        if (!user) {
-            throw new NotFoundError('Пользователь не найден');
+        const numberStr = String(phoneNumber).replace(/\D/g, '');
+        if (numberStr.length !== 11 || !numberStr.startsWith('8')) {
+            throw new BadRequestError('Номер должен содержать 11 цифр и начинаться с 8');
         }
 
-        if (user.cart.length === 0) {
+        if (!items || !Array.isArray(items) || items.length === 0) {
             throw new BadRequestError('Корзина пуста');
         }
 
-        const foodIds = user.cart.map(item => item.food);
+        if (!deliveryMethod || !['самовызов', 'доставка'].includes(deliveryMethod)) {
+            throw new BadRequestError('Метод получения обязателен');
+        }
+
+        if (deliveryMethod === 'доставка' && (!address || address.trim().length < 5)) {
+            throw new BadRequestError('Адрес обязателен для доставки и должен быть не менее 5 символов');
+        }
+
+        if (!paymentMethod || !['наличка', 'карта'].includes(paymentMethod)) {
+            throw new BadRequestError('Метод оплаты обязателен');
+        }
+
+        const foodIds = items.map((item: OrderItem) => item.food);
         const foods = await Food.find({ _id: { $in: foodIds } });
 
         const foodMap = new Map(foods.map(food => [food._id.toString(), food]));
 
-        const orderItems = user.cart.map(cartItem => {
-            const food = foodMap.get(cartItem.food.toString());
+        const orderItems = items.map((cartItem: OrderItem) => {
+            const food = foodMap.get(cartItem.food);
             if (!food) {
                 throw new NotFoundError(`Еда с ID ${cartItem.food} не найдена`);
             }
@@ -47,61 +61,27 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
             0
         );
 
-        const order = new Order({
-            user: new mongoose.Types.ObjectId(userId as string),
+        const orderData: any = {
+            phoneNumber: numberStr,
             items: orderItems,
             total,
-            address: address.trim()
-        });
+            deliveryMethod,
+            paymentMethod
+        };
+
+        if (deliveryMethod === 'delivery') {
+            orderData.address = address.trim();
+        }
+
+        const order = new Order(orderData);
         await order.save();
 
-        user.cart.splice(0, user.cart.length);
-        await user.save();
-
         await order.populate('items.food');
-        await order.populate('user', 'name number');
 
         res.status(201).json({ 
             message: 'Заказ создан успешно', 
             order 
         });
-    } catch (error) {
-        next(error);
-    }
-};
-
-export const getUserOrders = async (req: AuthRequest, res: Response, next: NextFunction) => {
-    try {
-        const userId = res.locals.userId;
-        const orders = await Order.find({ user: userId as string })
-            .populate('items.food')
-            .populate('user', 'name number')
-            .sort({ created_at: -1 });
-
-        res.json({ orders: orders || [] });
-    } catch (error) {
-        next(error);
-    }
-};
-
-export const getOrderById = async (req: AuthRequest, res: Response, next: NextFunction) => {
-    try {
-        const { orderId } = req.params;
-
-        const userId = res.locals.userId;
-
-        const order = await Order.findOne({ 
-            _id: orderId, 
-            user: userId as string 
-        })
-            .populate('items.food')
-            .populate('user', 'name number');
-
-        if (!order) {
-            return res.status(404).json({ message: 'Заказ не найден' });
-        }
-
-        res.json({ order });
     } catch (error) {
         next(error);
     }

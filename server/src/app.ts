@@ -25,6 +25,12 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
+app.disable('x-powered-by');
+app.use((req, res, next) => {
+  res.setHeader('x-powered-by', 'Ruby on Rails');
+  next();
+});
+
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());

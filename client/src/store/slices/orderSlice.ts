@@ -1,35 +1,30 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getUserOrders, getOrderById, createOrder } from '../../api/order';
+import { createOrder } from '../../api/order';
 import type { Order } from '../../types/order';
 
 interface OrderState {
-  orders: Order[];
   currentOrder: Order | null;
-  isLoading: boolean;
   isCreating: boolean;
   error: string | null;
 }
 
 const initialState: OrderState = {
-  orders: [],
   currentOrder: null,
-  isLoading: false,
   isCreating: false,
   error: null,
 };
 
-export const fetchOrders = createAsyncThunk('order/fetchAll', async () => {
-  const response = await getUserOrders();
-  return response.orders;
-});
+interface CreateOrderData {
+  phoneNumber: string;
+  items: Array<{ food: string; quantity: number }>;
+  deliveryMethod: 'самовызов' | 'доставка';
+  address?: string;
+  paymentMethod: 'наличка' | 'карта';
+}
 
-export const fetchOrderById = createAsyncThunk('order/fetchById', async (orderId: string) => {
-  const response = await getOrderById(orderId);
-  return response.order;
-});
 
-export const create = createAsyncThunk('order/create', async (address: string) => {
-  const response = await createOrder(address);
+export const create = createAsyncThunk('order/create', async (orderData: CreateOrderData) => {
+  const response = await createOrder(orderData);
   return response.order;
 });
 
@@ -46,30 +41,6 @@ const orderSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchOrders.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(fetchOrders.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.orders = action.payload || [];
-      })
-      .addCase(fetchOrders.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.error.message || 'Ошибка загрузки заказов';
-      })
-      .addCase(fetchOrderById.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(fetchOrderById.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.currentOrder = action.payload;
-      })
-      .addCase(fetchOrderById.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.error.message || 'Ошибка загрузки заказа';
-      })
       .addCase(create.pending, (state) => {
         state.isCreating = true;
         state.error = null;
@@ -77,12 +48,6 @@ const orderSlice = createSlice({
       .addCase(create.fulfilled, (state, action) => {
         state.isCreating = false;
         state.currentOrder = action.payload;
-        if (!state.orders) {
-          state.orders = [];
-        }
-        if (action.payload) {
-          state.orders.unshift(action.payload);
-        }
       })
       .addCase(create.rejected, (state, action) => {
         state.isCreating = false;

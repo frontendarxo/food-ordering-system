@@ -1,6 +1,7 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getCart, addToCart, updateCartItem, removeFromCart, clearCart } from '../../api/cart';
-import type { CartItem } from '../../types/food';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { CartItem, Food } from '../../types/food';
+
+const CART_STORAGE_KEY = 'qatar-cart';
 
 interface CartState {
   items: CartItem[];
@@ -8,97 +9,82 @@ interface CartState {
   error: string | null;
 }
 
+const loadCartFromStorage = (): CartItem[] => {
+  try {
+    const stored = localStorage.getItem(CART_STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки корзины из localStorage:', error);
+  }
+  return [];
+};
+
+const saveCartToStorage = (items: CartItem[]) => {
+  try {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+  } catch (error) {
+    console.error('Ошибка сохранения корзины в localStorage:', error);
+  }
+};
+
 const initialState: CartState = {
-  items: [],
+  items: loadCartFromStorage(),
   isLoading: false,
   error: null,
 };
-
-export const fetchCart = createAsyncThunk('cart/fetch', async () => {
-  const response = await getCart();
-  return response.cart;
-});
-
-export const addItem = createAsyncThunk(
-  'cart/add',
-  async ({ foodId, quantity }: { foodId: string; quantity: number }) => {
-    const response = await addToCart(foodId, quantity);
-    return response.cart;
-  }
-);
-
-export const updateItem = createAsyncThunk(
-  'cart/update',
-  async ({ foodId, quantity }: { foodId: string; quantity: number }) => {
-    const response = await updateCartItem(foodId, quantity);
-    return response.cart;
-  }
-);
-
-export const removeItem = createAsyncThunk('cart/remove', async (foodId: string) => {
-  const response = await removeFromCart(foodId);
-  return response.cart;
-});
-
-export const clear = createAsyncThunk('cart/clear', async () => {
-  await clearCart();
-  return [];
-});
 
 const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
+    loadCart: (state) => {
+      state.items = loadCartFromStorage();
+    },
+    addItem: (state, action: PayloadAction<{ food: Food; quantity: number }>) => {
+      const { food, quantity } = action.payload;
+      const existingItemIndex = state.items.findIndex(
+        (item) => item.food._id === food._id
+      );
+
+      if (existingItemIndex >= 0) {
+        state.items[existingItemIndex].quantity += quantity;
+      } else {
+        state.items.push({ food, quantity });
+      }
+
+      saveCartToStorage(state.items);
+    },
+    updateItem: (state, action: PayloadAction<{ foodId: string; quantity: number }>) => {
+      const { foodId, quantity } = action.payload;
+      const itemIndex = state.items.findIndex((item) => item.food._id === foodId);
+
+      if (itemIndex >= 0) {
+        if (quantity <= 0) {
+          state.items.splice(itemIndex, 1);
+        } else {
+          state.items[itemIndex].quantity = quantity;
+        }
+        saveCartToStorage(state.items);
+      }
+    },
+    removeItem: (state, action: PayloadAction<string>) => {
+      const foodId = action.payload;
+      state.items = state.items.filter((item) => item.food._id !== foodId);
+      saveCartToStorage(state.items);
+    },
+    clearCart: (state) => {
+      state.items = [];
+      saveCartToStorage(state.items);
+    },
     clearError: (state) => {
       state.error = null;
     },
   },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchCart.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(fetchCart.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.items = action.payload;
-      })
-      .addCase(fetchCart.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.error.message || 'Ошибка загрузки корзины';
-      })
-      .addCase(addItem.fulfilled, (state, action) => {
-        state.items = action.payload;
-        state.error = null;
-      })
-      .addCase(addItem.rejected, (state, action) => {
-        state.error = action.error.message || 'Ошибка добавления в корзину';
-      })
-      .addCase(updateItem.fulfilled, (state, action) => {
-        state.items = action.payload;
-        state.error = null;
-      })
-      .addCase(updateItem.rejected, (state, action) => {
-        state.error = action.error.message || 'Ошибка обновления корзины';
-      })
-      .addCase(removeItem.fulfilled, (state, action) => {
-        state.items = action.payload;
-        state.error = null;
-      })
-      .addCase(removeItem.rejected, (state, action) => {
-        state.error = action.error.message || 'Ошибка удаления из корзины';
-      })
-      .addCase(clear.fulfilled, (state) => {
-        state.items = [];
-        state.error = null;
-      })
-      .addCase(clear.rejected, (state, action) => {
-        state.error = action.error.message || 'Ошибка очистки корзины';
-      });
-  },
 });
 
-export const { clearError } = cartSlice.actions;
+export const { loadCart, addItem, updateItem, removeItem, clearCart, clearError } = cartSlice.actions;
 export default cartSlice.reducer;
 
 

@@ -8,15 +8,13 @@ export interface OrderItem {
 
 export interface Order {
   _id: string;
-  user: {
-    _id: string;
-    name: string;
-    number: string;
-  };
+  phoneNumber: string;
   items: OrderItem[];
   total: number;
-  address: string;
-  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
+  deliveryMethod: 'самовызов' | 'доставка';
+  address?: string;
+  paymentMethod: 'наличка' | 'карта';
+  status: 'ожидание' | 'принят' | 'отменен';
   created_at: string;
   formatted_created_at?: string;
   formatted_created_at_full?: string;

@@ -18,10 +18,16 @@ const orderItemSchema = new Schema({
 }, { _id: false });
 
 const orderSchema = new Schema({
-    user: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+    phoneNumber: {
+        type: String,
+        required: true,
+        validate: {
+            validator: function(v: string) {
+                const numberStr = v.replace(/\D/g, '');
+                return numberStr.length === 11 && numberStr.startsWith('8');
+            },
+            message: 'Номер должен содержать 11 цифр и начинаться с 8'
+        }
     },
     items: {
         type: [orderItemSchema],
@@ -32,10 +38,22 @@ const orderSchema = new Schema({
         required: true,
         min: 0
     },
+    deliveryMethod: {
+        type: String,
+        enum: ['самовызов', 'доставка'],
+        required: true
+    },
     address: {
         type: String,
-        required: true,
+        required: function(this: any) {
+            return this.deliveryMethod === 'доставка';
+        },
         minlength: [5, 'Адрес должен быть не менее 5 символов']
+    },
+    paymentMethod: {
+        type: String,
+        enum: ['наличка', 'карта'],
+        required: true
     },
     status: {
         type: String,

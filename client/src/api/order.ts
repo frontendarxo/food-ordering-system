@@ -5,38 +5,20 @@ const getHeaders = () => ({
     'Content-Type': 'application/json'
 });
 
-export const getUserOrders = async () => {
-    const response = await fetch(`${BASE_URL}/orders`, {
-        headers: getHeaders(),
-        credentials: 'include'
-    });
-    
-    if (!response.ok) {
-        await handleApiError(response, 'Ошибка загрузки заказов');
-    }
-    
-    return response.json();
-};
+interface CreateOrderData {
+    phoneNumber: string;
+    items: Array<{ food: string; quantity: number }>;
+    deliveryMethod: 'самовызов' | 'доставка';
+    address?: string;
+    paymentMethod: 'наличка' | 'карта';
+}
 
-export const getOrderById = async (orderId: string) => {
-    const response = await fetch(`${BASE_URL}/orders/${orderId}`, {
-        headers: getHeaders(),
-        credentials: 'include'
-    });
-    
-    if (!response.ok) {
-        await handleApiError(response, 'Ошибка загрузки заказа');
-    }
-    
-    return response.json();
-};
-
-export const createOrder = async (address: string) => {
+export const createOrder = async (orderData: CreateOrderData) => {
     const response = await fetch(`${BASE_URL}/orders`, {
         method: 'POST',
         headers: getHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ address })
+        body: JSON.stringify(orderData)
     });
     
     if (!response.ok) {

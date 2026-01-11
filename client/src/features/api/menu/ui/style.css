@@ -85,6 +85,83 @@
   transform: scale(0.98);
 }
 
+.food-card-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #8A1538 0%, #a01a45 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(138, 21, 56, 0.4);
+  z-index: 1000;
+  font-weight: 600;
+  font-size: 1rem;
+  animation: slideInRight 0.3s ease, fadeOut 0.3s ease 1.7s forwards;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.food-card-notification::before {
+  content: '✓';
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+@media (max-width: 768px) {
+  .food-card-notification {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    padding: 0.875rem 1.25rem;
+    font-size: 0.95rem;
+    animation: slideInTop 0.3s ease, fadeOutTop 0.3s ease 1.7s forwards;
+  }
+
+  @keyframes slideInTop {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeOutTop {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-100%);
+    }
+  }
+}
+
 .category-filter {
   margin-bottom: 2rem;
   position: relative;
