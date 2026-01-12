@@ -36,7 +36,7 @@ export const Navbar = () => {
               Меню
             </Link>
           </li>
-          {user?.role !== 'admin' && (
+          {user?.role !== 'admin' && user?.role !== 'worker' && (
             <li>
               <Link to="/cart" onClick={closeMenu}>
                 Корзина
@@ -48,7 +48,7 @@ export const Navbar = () => {
               {user?.role === 'worker' && (
                 <li>
                   <Link to="/worker" onClick={closeMenu}>
-                    Работник
+                    Заказы
                   </Link>
                 </li>
               )}

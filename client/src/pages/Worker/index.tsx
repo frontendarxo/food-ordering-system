@@ -1,12 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useAuth } from '../../contexts/useAuth';
+import { useEffect, useState, useMemo } from 'react';
 import { getAllOrders, updateOrderStatus } from '../../api/order';
-import { getAllMenu, updateFoodStock } from '../../api/menu';
 import { OrderCard } from '../../features/api/order/ui/OrderCard';
-import { Button } from '../../shared/button';
-import { getImageUrl } from '../../utils/imageUrl';
 import type { Order } from '../../types/order';
-import type { Food } from '../../types/food';
 import './style.css';
 
 const ORDER_STATUSES = [
@@ -15,12 +10,11 @@ const ORDER_STATUSES = [
   { value: 'cancelled', label: 'Отменен' },
 ];
 
+const HOURS_24_MS = 24 * 60 * 60 * 1000;
+
 export const Worker = () => {
-  const { logout } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [foods, setFoods] = useState<Food[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'orders' | 'foods'>('orders');
 
   useEffect(() => {
     loadData();
@@ -29,18 +23,24 @@ export const Worker = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [ordersData, foodsData] = await Promise.all([
-        getAllOrders(),
-        getAllMenu(),
-      ]);
+      const ordersData = await getAllOrders();
       setOrders(ordersData.orders);
-      setFoods(foodsData.foods);
     } catch (error) {
       console.error('Ошибка загрузки данных:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  const recentOrders = useMemo(() => {
+    const now = new Date().getTime();
+    return orders.filter((order) => {
+      if (!order.created_at) return false;
+      const orderDate = new Date(order.created_at).getTime();
+      const timeDiff = now - orderDate;
+      return timeDiff <= HOURS_24_MS;
+    });
+  }, [orders]);
 
   const handleOrderStatusChange = async (orderId: string, status: string) => {
     try {
@@ -51,15 +51,6 @@ export const Worker = () => {
     }
   };
 
-  const handleFoodStockToggle = async (foodId: string, currentStock: boolean) => {
-    try {
-      await updateFoodStock(foodId, !currentStock);
-      await loadData();
-    } catch (error) {
-      console.error('Ошибка обновления наличия:', error);
-    }
-  };
-
   if (loading) {
     return <div className="worker-loading">Загрузка...</div>;
   }
@@ -67,79 +58,37 @@ export const Worker = () => {
   return (
     <div className="worker-page">
       <div className="worker-header">
-        <h1>Панель работника</h1>
-        <Button onClick={logout}>Выйти</Button>
+        <h1>Заказы</h1>
       </div>
 
-      <div className="worker-tabs">
-        <button
-          className={`worker-tab ${activeTab === 'orders' ? 'active' : ''}`}
-          onClick={() => setActiveTab('orders')}
-        >
-          Заказы
-        </button>
-        <button
-          className={`worker-tab ${activeTab === 'foods' ? 'active' : ''}`}
-          onClick={() => setActiveTab('foods')}
-        >
-          Наличие еды
-        </button>
-      </div>
-
-      {activeTab === 'orders' && (
-        <div className="worker-orders">
-          {orders.length === 0 ? (
-            <div className="worker-empty">Нет заказов</div>
-          ) : (
-            orders.map((order) => (
-              <div key={order._id} className="worker-order-item">
-                <OrderCard order={order} />
-                <div className="worker-order-actions">
-                  <label>
-                    Статус:
-                    <select
-                      value={order.status}
-                      onChange={(e) => handleOrderStatusChange(order._id, e.target.value)}
-                    >
-                      {ORDER_STATUSES.map((status) => (
-                        <option key={status.value} value={status.value}>
-                          {status.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                </div>
-              </div>
-            ))
-          )}
+      {recentOrders.length === 0 ? (
+        <div className="worker-empty">
+          <div className="worker-empty-icon">📦</div>
+          <h2>Нет заказов</h2>
+          <p>{orders.length === 0 ? 'Заказы будут отображаться здесь' : 'Нет заказов за последние 24 часа'}</p>
         </div>
-      )}
-
-      {activeTab === 'foods' && (
-        <div className="worker-foods">
-          {foods.length === 0 ? (
-            <div className="worker-empty">Нет еды</div>
-          ) : (
-            <div className="worker-foods-grid">
-              {foods.map((food) => (
-                <div key={food._id} className="worker-food-item">
-                  <img src={getImageUrl(food.image)} alt={food.name} className="worker-food-image" />
-                  <div className="worker-food-info">
-                    <h3>{food.name}</h3>
-                    <p>{food.price} ₽</p>
-                    <label className="worker-food-stock">
-                      <input
-                        type="checkbox"
-                        checked={food.inStock}
-                        onChange={() => handleFoodStockToggle(food._id, food.inStock)}
-                      />
-                      <span>{food.inStock ? 'В наличии' : 'Нет в наличии'}</span>
-                    </label>
-                  </div>
-                </div>
-              ))}
+      ) : (
+        <div className="worker-orders">
+          {recentOrders.map((order) => (
+            <div key={order._id} className="worker-order-item">
+              <OrderCard order={order} />
+              <div className="worker-order-actions">
+                <label>
+                  Статус:
+                  <select
+                    value={order.status}
+                    onChange={(e) => handleOrderStatusChange(order._id, e.target.value)}
+                  >
+                    {ORDER_STATUSES.map((status) => (
+                      <option key={status.value} value={status.value}>
+                        {status.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
             </div>
-          )}
+          ))}
         </div>
       )}
     </div>

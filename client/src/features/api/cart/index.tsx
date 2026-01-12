@@ -8,7 +8,7 @@ export const Cart = () => {
   const { user } = useAuth();
   const { items, isLoading, error } = useCart();
 
-  if (user?.role === 'admin') {
+  if (user?.role === 'admin' || user?.role === 'worker') {
     return <Navigate to="/" replace />;
   }
 

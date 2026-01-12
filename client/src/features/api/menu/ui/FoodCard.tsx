@@ -36,6 +36,7 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
   const [imageError, setImageError] = useState(false);
 
   const isAdmin = user?.role === 'admin';
+  const isWorker = user?.role === 'worker';
 
   useEffect(() => {
     if (!isEditingName) {
@@ -396,8 +397,8 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
         <div className="food-card-info">
           {nameDisplay}
           {priceDisplay}
-          {!isAdmin && !food.inStock && <p className="food-card-status">Нет в наличии</p>}
-          {isAdmin && (
+          {!isAdmin && !isWorker && !food.inStock && <p className="food-card-status">Нет в наличии</p>}
+          {(isAdmin || isWorker) && (
             <label
               className={`food-card-stock-toggle ${
                 food.inStock ? 'food-card-stock-toggle-active' : 'food-card-stock-toggle-inactive'
@@ -418,7 +419,7 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
               </span>
             </label>
           )}
-          {!isAdmin && food.inStock && (
+          {!isAdmin && !isWorker && food.inStock && (
             <button className="food-card-button" onClick={handleAddToCart}>
               В корзину
             </button>
