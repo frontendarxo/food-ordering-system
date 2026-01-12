@@ -113,6 +113,58 @@ export const updateFoodStock = async (req: Request, res: Response, next: NextFun
     }
 }
 
+export const updateFoodName = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const { name } = req.body;
+
+        if (!name || typeof name !== 'string' || !name.trim()) {
+            throw new BadRequestError('Название обязательно и должно быть непустой строкой');
+        }
+
+        const food = await Food.findByIdAndUpdate(
+            id,
+            { name: name.trim() },
+            { new: true }
+        );
+
+        if (!food) {
+            throw new NotFoundError('Еда не найдена');
+        }
+
+        res.status(200).json({ food });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const updateFoodImage = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const file = req.file;
+
+        if (!file) {
+            throw new BadRequestError('Изображение обязательно');
+        }
+
+        const food = await Food.findById(id);
+        if (!food) {
+            throw new NotFoundError('Еда не найдена');
+        }
+
+        const imagePath = `/uploads/images/${file.filename}`;
+        const updatedFood = await Food.findByIdAndUpdate(
+            id,
+            { image: imagePath },
+            { new: true }
+        );
+
+        res.status(200).json({ food: updatedFood });
+    } catch (error) {
+        next(error);
+    }
+}
+
 export const deleteFood = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;

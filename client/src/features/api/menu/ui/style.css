@@ -30,10 +30,171 @@
   opacity: 0.6;
 }
 
+.food-card-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
 .food-card-image {
   width: 100%;
   height: 200px;
   object-fit: cover;
+  transition: opacity 0.3s ease;
+}
+
+.food-card-image-hidden {
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.food-card-image-skeleton {
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #e0e0e0 50%,
+    #f0f0f0 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+.food-card-image-error {
+  width: 100%;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  color: #999;
+  gap: 0.5rem;
+}
+
+.food-card-image-error-icon {
+  font-size: 2.5rem;
+  opacity: 0.5;
+}
+
+.food-card-image-error-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.food-card-image-edit-button {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.5rem;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+  z-index: 5;
+}
+
+.food-card-image-edit-button:hover {
+  opacity: 1;
+}
+
+.food-card-image-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #f9f9f9;
+  border-radius: 4px;
+}
+
+.food-card-image-input {
+  padding: 0.5rem;
+  border: 2px solid #8A1538;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.food-card-image-input:focus {
+  outline: none;
+  border-color: #a01a45;
+}
+
+.food-card-image-input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.food-card-image-preview {
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.food-card-image-preview img {
+  width: 100%;
+  height: auto;
+  max-height: 200px;
+  object-fit: contain;
+  display: block;
+}
+
+.food-card-image-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.food-card-image-save,
+.food-card-image-cancel {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.food-card-image-save {
+  background: #28a745;
+  color: white;
+}
+
+.food-card-image-save:hover:not(:disabled) {
+  background: #218838;
+}
+
+.food-card-image-cancel {
+  background: #dc3545;
+  color: white;
+}
+
+.food-card-image-cancel:hover:not(:disabled) {
+  background: #c82333;
+}
+
+.food-card-image-save:disabled,
+.food-card-image-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .food-card-info {
@@ -44,12 +205,19 @@
   flex-grow: 1;
 }
 
+.food-card-name-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  min-height: 3rem;
+}
+
 .food-card-name {
   font-size: 1.2rem;
   font-weight: 600;
   color: #333;
   margin: 0;
-  min-height: 3rem;
+  flex: 1;
   line-height: 1.5rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -57,6 +225,74 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.food-card-name-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 3rem;
+}
+
+.food-card-name-input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 2px solid #8A1538;
+  border-radius: 4px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.food-card-name-input:focus {
+  outline: none;
+  border-color: #a01a45;
+}
+
+.food-card-name-input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.food-card-name-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.food-card-name-save,
+.food-card-name-cancel {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.food-card-name-save {
+  background: #28a745;
+  color: white;
+}
+
+.food-card-name-save:hover:not(:disabled) {
+  background: #218838;
+}
+
+.food-card-name-cancel {
+  background: #dc3545;
+  color: white;
+}
+
+.food-card-name-cancel:hover:not(:disabled) {
+  background: #c82333;
+}
+
+.food-card-name-save:disabled,
+.food-card-name-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .food-card-price {

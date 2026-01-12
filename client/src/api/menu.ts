@@ -80,6 +80,38 @@ export const updateFoodStock = async (id: string, inStock: boolean): Promise<{ f
     return response.json();
 };
 
+export const updateFoodName = async (id: string, name: string): Promise<{ food: Food }> => {
+    const response = await fetch(`${BASE_URL}/foods/${id}/name`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name }),
+    });
+    
+    if (!response.ok) {
+        await handleApiError(response, 'Ошибка обновления названия');
+    }
+    
+    return response.json();
+};
+
+export const updateFoodImage = async (id: string, image: File): Promise<{ food: Food }> => {
+    const formData = new FormData();
+    formData.append('image', image);
+
+    const response = await fetch(`${BASE_URL}/foods/${id}/image`, {
+        method: 'PATCH',
+        body: formData,
+    });
+    
+    if (!response.ok) {
+        await handleApiError(response, 'Ошибка обновления изображения');
+    }
+    
+    return response.json();
+};
+
 export const deleteFood = async (id: string) => {
     const response = await fetch(`${BASE_URL}/foods/${id}`, {
         method: 'DELETE',
