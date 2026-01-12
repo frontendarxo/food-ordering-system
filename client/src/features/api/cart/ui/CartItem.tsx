@@ -1,6 +1,7 @@
 import type { CartItem as CartItemType } from '../../../../types/food';
 import { useCartActions } from '../model';
 import { formatPrice } from '../lib';
+import { getImageUrl } from '../../../../utils/imageUrl';
 import './style.css';
 
 interface CartItemProps {
@@ -24,7 +25,7 @@ export const CartItem = ({ item }: CartItemProps) => {
 
   return (
     <div className="cart-item">
-      <img src={item.food.image} alt={item.food.name} className="cart-item-image" />
+      <img src={getImageUrl(item.food.image)} alt={item.food.name} className="cart-item-image" />
       <div className="cart-item-info">
         <h3 className="cart-item-name">{item.food.name}</h3>
         <p className="cart-item-price">{formatPrice(item.food.price)}</p>

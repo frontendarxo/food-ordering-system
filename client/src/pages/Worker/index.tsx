@@ -4,6 +4,7 @@ import { getAllOrders, updateOrderStatus } from '../../api/order';
 import { getAllMenu, updateFoodStock } from '../../api/menu';
 import { OrderCard } from '../../features/api/order/ui/OrderCard';
 import { Button } from '../../shared/button';
+import { getImageUrl } from '../../utils/imageUrl';
 import type { Order } from '../../types/order';
 import type { Food } from '../../types/food';
 import './style.css';
@@ -122,7 +123,7 @@ export const Worker = () => {
             <div className="worker-foods-grid">
               {foods.map((food) => (
                 <div key={food._id} className="worker-food-item">
-                  <img src={food.image} alt={food.name} className="worker-food-image" />
+                  <img src={getImageUrl(food.image)} alt={food.name} className="worker-food-image" />
                   <div className="worker-food-info">
                     <h3>{food.name}</h3>
                     <p>{food.price} ₽</p>

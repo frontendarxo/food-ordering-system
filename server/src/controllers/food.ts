@@ -30,22 +30,30 @@ export const getFoodByCategory = async (req: Request, res: Response, next: NextF
 
 export const createFood = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { name, price, category, image, inStock } = req.body;
+        const { name, price, category, inStock } = req.body;
+        const file = req.file;
 
-        if (!name || !price || !category || !image) {
+        if (!name || !price || !category) {
             throw new BadRequestError('Все поля обязательны для заполнения');
         }
 
-        if (typeof price !== 'number' || price <= 0) {
+        const parsedPrice = typeof price === 'string' ? parseFloat(price) : price;
+        if (typeof parsedPrice !== 'number' || parsedPrice <= 0 || isNaN(parsedPrice)) {
             throw new BadRequestError('Цена должна быть положительным числом');
         }
 
+        if (!file) {
+            throw new BadRequestError('Изображение обязательно');
+        }
+
+        const imagePath = `/uploads/images/${file.filename}`;
+
         const food = new Food({
-            name,
-            price,
-            category,
-            image,
-            inStock: inStock !== undefined ? inStock : true
+            name: name.trim(),
+            price: parsedPrice,
+            category: category.trim(),
+            image: imagePath,
+            inStock: inStock !== undefined ? (inStock === 'true' || inStock === true) : true
         });
 
         await food.save();

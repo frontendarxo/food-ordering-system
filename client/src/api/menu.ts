@@ -26,15 +26,19 @@ export const createFood = async (foodData: {
     name: string;
     price: number;
     category: string;
-    image: string;
+    image: File;
     inStock: boolean;
 }): Promise<{ food: Food }> => {
+    const formData = new FormData();
+    formData.append('name', foodData.name);
+    formData.append('price', foodData.price.toString());
+    formData.append('category', foodData.category);
+    formData.append('image', foodData.image);
+    formData.append('inStock', foodData.inStock.toString());
+
     const response = await fetch(`${BASE_URL}/foods`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(foodData),
+        body: formData,
     });
     
     if (!response.ok) {

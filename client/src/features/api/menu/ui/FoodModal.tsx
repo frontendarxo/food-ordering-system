@@ -16,7 +16,8 @@ export const FoodModal = ({ isOpen, onClose, selectedCategory }: FoodModalProps)
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState(selectedCategory === 'all' ? '' : selectedCategory);
-  const [image, setImage] = useState('');
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [inStock, setInStock] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -26,11 +27,29 @@ export const FoodModal = ({ isOpen, onClose, selectedCategory }: FoodModalProps)
       setName('');
       setPrice('');
       setCategory(selectedCategory === 'all' ? '' : selectedCategory);
-      setImage('');
+      setImage(null);
+      setImagePreview(null);
       setInStock(true);
       setError('');
     }
   }, [isOpen, selectedCategory]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Размер изображения не должен превышать 5 МБ');
+        return;
+      }
+      setImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      setError('');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,8 +70,8 @@ export const FoodModal = ({ isOpen, onClose, selectedCategory }: FoodModalProps)
       return;
     }
 
-    if (!image.trim()) {
-      setError('Ссылка на изображение обязательна');
+    if (!image) {
+      setError('Изображение обязательно');
       return;
     }
 
@@ -63,7 +82,7 @@ export const FoodModal = ({ isOpen, onClose, selectedCategory }: FoodModalProps)
         name: name.trim(),
         price: parseFloat(price),
         category: category.trim(),
-        image: image.trim(),
+        image,
         inStock,
       });
 
@@ -143,15 +162,20 @@ export const FoodModal = ({ isOpen, onClose, selectedCategory }: FoodModalProps)
             </select>
           </div>
           <div className="food-modal-field">
-            <label htmlFor="image">Ссылка на изображение *</label>
+            <label htmlFor="image">Изображение *</label>
             <input
               id="image"
-              type="url"
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+              onChange={handleImageChange}
               required
               disabled={isSubmitting}
             />
+            {imagePreview && (
+              <div className="food-modal-image-preview">
+                <img src={imagePreview} alt="Предпросмотр" />
+              </div>
+            )}
           </div>
           <div className="food-modal-field">
             <label

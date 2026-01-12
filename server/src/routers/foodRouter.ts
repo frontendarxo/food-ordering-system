@@ -7,12 +7,13 @@ import {
     updateFoodStock,
     deleteFood
 } from '../controllers/food.js';
+import { upload } from '../middlewares/upload.js';
 
 const router = Router();
 
 router.get('/', getAllFoods);
 router.get('/:category', getFoodByCategory);
-router.post('/', createFood);
+router.post('/', upload.single('image'), createFood);
 router.patch('/:id/price', updateFoodPrice);
 router.patch('/:id/stock', updateFoodStock);
 router.delete('/:id', deleteFood);

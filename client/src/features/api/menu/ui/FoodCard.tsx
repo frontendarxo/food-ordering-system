@@ -7,6 +7,7 @@ import { updateFoodPrice, deleteFood, updateFoodStock } from '../../../../api/me
 import { useAppDispatch } from '../../../../store/hooks';
 import { fetchAllMenu, fetchCategory } from '../../../../store/slices/menuSlice';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { getImageUrl } from '../../../../utils/imageUrl';
 import './style.css';
 
 interface FoodCardProps {
@@ -150,7 +151,7 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
   return (
     <>
       <div className={`food-card ${!food.inStock ? 'food-card-out-of-stock' : ''}`}>
-        <img src={food.image} alt={food.name} className="food-card-image" />
+        <img src={getImageUrl(food.image)} alt={food.name} className="food-card-image" />
         {isAdmin && (
           <button
             className="food-card-delete-button"

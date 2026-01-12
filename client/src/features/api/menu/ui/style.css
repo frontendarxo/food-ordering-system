@@ -657,6 +657,27 @@
   background: white;
 }
 
+.food-modal-field input[type="file"] {
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.food-modal-image-preview {
+  margin-top: 0.5rem;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.food-modal-image-preview img {
+  width: 100%;
+  height: auto;
+  max-height: 200px;
+  object-fit: contain;
+  display: block;
+}
+
 .food-modal-checkbox-label {
   display: flex;
   flex-direction: row;
