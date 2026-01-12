@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/useAuth';
 import './style.css';
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isAuthenticated, user, logout } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -34,11 +36,36 @@ export const Navbar = () => {
               Меню
             </Link>
           </li>
-          <li>
-            <Link to="/cart" onClick={closeMenu}>
-              Корзина
-            </Link>
-          </li>
+          {user?.role !== 'admin' && (
+            <li>
+              <Link to="/cart" onClick={closeMenu}>
+                Корзина
+              </Link>
+            </li>
+          )}
+          {isAuthenticated && (
+            <>
+              {user?.role === 'worker' && (
+                <li>
+                  <Link to="/worker" onClick={closeMenu}>
+                    Работник
+                  </Link>
+                </li>
+              )}
+              <li>
+                <button onClick={logout} className="navbar-logout">
+                  Выйти
+                </button>
+              </li>
+            </>
+          )}
+          {!isAuthenticated && (
+            <li>
+              <Link to="/login" onClick={closeMenu}>
+                Вход
+              </Link>
+            </li>
+          )}
         </ul>
       </div>
     </nav>

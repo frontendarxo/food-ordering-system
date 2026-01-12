@@ -1,9 +1,16 @@
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../../../contexts/useAuth';
 import { useCart } from './model';
 import { CartList, CartTotal } from './ui';
 import './style.css';
 
 export const Cart = () => {
+  const { user } = useAuth();
   const { items, isLoading, error } = useCart();
+
+  if (user?.role === 'admin') {
+    return <Navigate to="/" replace />;
+  }
 
   if (isLoading) {
     return <div className="cart-loading">Загрузка корзины...</div>;

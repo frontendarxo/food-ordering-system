@@ -86,3 +86,37 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
         next(error);
     }
 };
+
+export const getAllOrders = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const orders = await Order.find().populate('items.food').sort({ created_at: -1 });
+        res.status(200).json({ orders });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const updateOrderStatus = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        if (!status || !['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'].includes(status)) {
+            throw new BadRequestError('Некорректный статус заказа');
+        }
+
+        const order = await Order.findByIdAndUpdate(
+            id,
+            { status },
+            { new: true }
+        ).populate('items.food');
+
+        if (!order) {
+            throw new NotFoundError('Заказ не найден');
+        }
+
+        res.status(200).json({ order });
+    } catch (error) {
+        next(error);
+    }
+};

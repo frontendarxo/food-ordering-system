@@ -14,7 +14,7 @@ export interface Order {
   deliveryMethod: 'самовызов' | 'доставка';
   address?: string;
   paymentMethod: 'наличка' | 'карта';
-  status: 'ожидание' | 'принят' | 'отменен';
+  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
   created_at: string;
   formatted_created_at?: string;
   formatted_created_at_full?: string;

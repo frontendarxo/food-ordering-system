@@ -1,5 +1,6 @@
 import { BASE_URL } from './config';
 import { handleApiError } from './utils';
+import type { Order } from '../types/order';
 
 const getHeaders = () => ({
     'Content-Type': 'application/json'
@@ -23,6 +24,32 @@ export const createOrder = async (orderData: CreateOrderData) => {
     
     if (!response.ok) {
         await handleApiError(response, 'Ошибка создания заказа');
+    }
+    
+    return response.json();
+};
+
+export const getAllOrders = async (): Promise<{ orders: Order[] }> => {
+    const response = await fetch(`${BASE_URL}/orders`, {
+        headers: getHeaders(),
+    });
+    
+    if (!response.ok) {
+        await handleApiError(response, 'Ошибка загрузки заказов');
+    }
+    
+    return response.json();
+};
+
+export const updateOrderStatus = async (id: string, status: string) => {
+    const response = await fetch(`${BASE_URL}/orders/${id}/status`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+        body: JSON.stringify({ status }),
+    });
+    
+    if (!response.ok) {
+        await handleApiError(response, 'Ошибка обновления статуса заказа');
     }
     
     return response.json();

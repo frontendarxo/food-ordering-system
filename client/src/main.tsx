@@ -5,13 +5,19 @@ import './index.css'
 import App from './app/App.tsx'
 import { Provider } from 'react-redux'
 import { store } from './store/store.ts'
+import { AuthProvider } from './contexts/AuthContext.tsx'
+import { ErrorBoundary } from './shared/ErrorBoundary'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
-      <Provider store={store}>
-        <App />
-      </Provider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Provider store={store}>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </Provider>
+      </BrowserRouter>
+    </ErrorBoundary>
   </StrictMode>,
 )

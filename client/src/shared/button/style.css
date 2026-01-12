@@ -1,4 +1,4 @@
-button {
+button.button {
   font-family: 'Montserrat', sans-serif;
   padding: 0.875rem 2rem;
   font-size: 1rem;
@@ -13,13 +13,22 @@ button {
   letter-spacing: 0.5px;
 }
 
-button:active {
+button.button:active {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-button:disabled {
+button.button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+button.button-danger {
+  background-color: #d32f2f;
+  color: white;
+}
+
+button.button-danger:hover {
+  background-color: #b71c1c;
 }
 
