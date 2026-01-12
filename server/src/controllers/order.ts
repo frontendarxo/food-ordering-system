@@ -69,7 +69,7 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
             paymentMethod
         };
 
-        if (deliveryMethod === 'delivery') {
+        if (deliveryMethod === 'доставка') {
             orderData.address = address.trim();
         }
 
@@ -101,13 +101,16 @@ export const updateOrderStatus = async (req: Request, res: Response, next: NextF
         const { id } = req.params;
         const { status } = req.body;
 
-        if (!status || !['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'].includes(status)) {
+        if (!status || !['pending', 'confirmed', 'cancelled'].includes(status)) {
             throw new BadRequestError('Некорректный статус заказа');
         }
 
         const order = await Order.findByIdAndUpdate(
             id,
-            { status },
+            { 
+                status,
+                statusChangedAt: new Date()
+            },
             { new: true }
         ).populate('items.food');
 

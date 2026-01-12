@@ -4,6 +4,7 @@ import { Cart } from '../../features/api/cart';
 import { Home } from '../../pages/Home';
 import { Login } from '../../pages/Login';
 import { WorkerPage } from '../../pages/Worker/WorkerPage';
+import { AdminOrdersPage } from '../../pages/AdminOrders';
 
 export const AppRouter = () => {
   return (
@@ -13,6 +14,7 @@ export const AppRouter = () => {
         <Route index element={<Home />} />
         <Route path="cart" element={<Cart />} />
         <Route path="worker" element={<WorkerPage />} />
+        <Route path="admin/orders" element={<AdminOrdersPage />} />
       </Route>
     </Routes>
   );

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Order } from '../../../../types/order';
 import { formatPrice } from '../../cart/lib';
+import { getDeliveryMethodText, getPaymentMethodText } from '../lib';
 import './style.css';
 
 interface OrderCardProps {
@@ -10,10 +11,7 @@ interface OrderCardProps {
 const getStatusText = (status: Order['status']): string => {
   const statusMap = {
     pending: 'Ожидает подтверждения',
-    confirmed: 'Подтвержден',
-    preparing: 'Готовится',
-    ready: 'Готов',
-    delivered: 'Доставлен',
+    confirmed: 'Принят',
     cancelled: 'Отменен',
   };
   return statusMap[status] || status;
@@ -23,9 +21,6 @@ const getStatusIcon = (status: Order['status']): string => {
   const iconMap = {
     pending: '⏳',
     confirmed: '✅',
-    preparing: '👨‍🍳',
-    ready: '📦',
-    delivered: '🚚',
     cancelled: '❌',
   };
   return iconMap[status] || '📋';
@@ -84,9 +79,21 @@ export const OrderCard = ({ order }: OrderCardProps) => {
 
       {isExpanded && (
         <div className="order-card-details">
-          <div className="order-card-address">
-            <span className="order-card-address-label">📍 Адрес доставки:</span>
-            <span className="order-card-address-value">{address}</span>
+          <div className="order-card-info-section">
+            <div className="order-card-info-item">
+              <span className="order-card-info-label">Способ доставки:</span>
+              <span className="order-card-info-value">{getDeliveryMethodText(order.deliveryMethod)}</span>
+            </div>
+            {order.address && (
+              <div className="order-card-info-item">
+                <span className="order-card-info-label">📍 Адрес доставки:</span>
+                <span className="order-card-info-value">{address}</span>
+              </div>
+            )}
+            <div className="order-card-info-item">
+              <span className="order-card-info-label">Способ оплаты:</span>
+              <span className="order-card-info-value">{getPaymentMethodText(order.paymentMethod)}</span>
+            </div>
           </div>
 
           <div className="order-card-items">

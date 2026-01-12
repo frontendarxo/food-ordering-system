@@ -7,6 +7,7 @@
     "build": "tsc -b",
     "start": "node dist/app.js",
     "dev": "tsx --tsconfig tsconfig.dev.json --watch src/app.ts",
+    "migrate:order-statuses": "tsx --tsconfig tsconfig.dev.json src/migrations/migrateOrderStatuses.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

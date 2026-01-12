@@ -10,10 +10,7 @@ import './style.css';
 
 const ORDER_STATUSES = [
   { value: 'pending', label: 'Ожидает подтверждения' },
-  { value: 'confirmed', label: 'Подтвержден' },
-  { value: 'preparing', label: 'Готовится' },
-  { value: 'ready', label: 'Готов' },
-  { value: 'delivered', label: 'Доставлен' },
+  { value: 'confirmed', label: 'Принят' },
   { value: 'cancelled', label: 'Отменен' },
 ];
 

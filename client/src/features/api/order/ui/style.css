@@ -122,27 +122,19 @@
   color: #0c5460;
 }
 
-.order-card-status-preparing {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.order-card-status-ready {
-  background-color: #cce5ff;
-  color: #004085;
-}
-
-.order-card-status-delivered {
-  background-color: #d1f2eb;
-  color: #0d5d4f;
-}
-
 .order-card-status-cancelled {
   background-color: #f8d7da;
   color: #721c24;
 }
 
-.order-card-address {
+.order-card-info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.order-card-info-item {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -152,7 +144,7 @@
   border-left: 3px solid #8A1538;
 }
 
-.order-card-address-label {
+.order-card-info-label {
   font-weight: 600;
   color: #666;
   font-size: 0.85rem;
@@ -160,7 +152,7 @@
   letter-spacing: 0.5px;
 }
 
-.order-card-address-value {
+.order-card-info-value {
   color: #333;
   font-size: 0.95rem;
 }

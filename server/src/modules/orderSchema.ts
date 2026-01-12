@@ -57,8 +57,12 @@ const orderSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'],
+        enum: ['pending', 'confirmed', 'cancelled'],
         default: 'pending'
+    },
+    statusChangedAt: {
+        type: Date,
+        default: null
     }
 }, { 
     timestamps: {
@@ -101,6 +105,19 @@ orderSchema.virtual('formatted_created_at_full').get(function(this: any) {
     };
 
     return date.toLocaleString('ru-RU', options).replace(',', '');
+});
+
+orderSchema.virtual('formatted_status_changed_at').get(function(this: any) {
+    if (!this.statusChangedAt) return null;
+
+    const date = new Date(this.statusChangedAt);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${day}.${month}.${year}, ${hours}:${minutes}`;
 });
 
 const Order = model('Order', orderSchema);

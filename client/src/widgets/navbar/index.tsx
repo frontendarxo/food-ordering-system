@@ -52,6 +52,13 @@ export const Navbar = () => {
                   </Link>
                 </li>
               )}
+              {user?.role === 'admin' && (
+                <li>
+                  <Link to="/admin/orders" onClick={closeMenu}>
+                    Заказы
+                  </Link>
+                </li>
+              )}
               <li>
                 <button onClick={logout} className="navbar-logout">
                   Выйти

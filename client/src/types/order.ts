@@ -14,10 +14,12 @@ export interface Order {
   deliveryMethod: 'самовызов' | 'доставка';
   address?: string;
   paymentMethod: 'наличка' | 'карта';
-  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'cancelled';
   created_at: string;
+  statusChangedAt?: string;
   formatted_created_at?: string;
   formatted_created_at_full?: string;
+  formatted_status_changed_at?: string;
 }
 
 
