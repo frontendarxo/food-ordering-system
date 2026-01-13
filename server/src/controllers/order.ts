@@ -4,6 +4,7 @@ import Order from "../modules/orderSchema.js";
 import Food from "../modules/FoodSchema.js";
 import { NotFoundError } from "../errors/not-found.js";
 import { BadRequestError } from "../errors/bad-request.js";
+import { invalidateOrderCache } from "../utils/cache.js";
 
 interface OrderItem {
     food: string;
@@ -82,6 +83,7 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
         await order.save();
 
         await order.populate('items.food');
+        await invalidateOrderCache();
 
         res.status(201).json({ 
             message: 'Заказ создан успешно', 
@@ -123,6 +125,7 @@ export const updateOrderStatus = async (req: Request, res: Response, next: NextF
             throw new NotFoundError('Заказ не найден');
         }
 
+        await invalidateOrderCache();
         res.status(200).json({ order });
     } catch (error) {
         next(error);

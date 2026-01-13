@@ -10,11 +10,12 @@ import {
     deleteFood
 } from '../controllers/food.js';
 import { upload } from '../middlewares/upload.js';
+import { cacheMiddleware } from '../middlewares/cache.js';
 
 const router = Router();
 
-router.get('/', getAllFoods);
-router.get('/:category', getFoodByCategory);
+router.get('/', cacheMiddleware(), getAllFoods);
+router.get('/:category', cacheMiddleware(), getFoodByCategory);
 router.post('/', upload.single('image'), createFood);
 router.patch('/:id/price', updateFoodPrice);
 router.patch('/:id/stock', updateFoodStock);

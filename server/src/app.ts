@@ -16,6 +16,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import { handleError } from './middlewares/handleError.js';
 import router from './routers/index.js';
+import './utils/redis.js';
 
 const app = express();
 

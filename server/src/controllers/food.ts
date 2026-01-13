@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from "express"
 import Food from "../modules/FoodSchema.js"
 import { NotFoundError } from "../errors/not-found.js";
 import { BadRequestError } from "../errors/bad-request.js";
+import { invalidateFoodCache } from "../utils/cache.js";
 
 export const getAllFoods = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -57,6 +58,7 @@ export const createFood = async (req: Request, res: Response, next: NextFunction
         });
 
         await food.save();
+        await invalidateFoodCache();
         res.status(201).json({ food });
     } catch (error) {
         next(error);
@@ -82,6 +84,7 @@ export const updateFoodPrice = async (req: Request, res: Response, next: NextFun
             throw new NotFoundError('Еда не найдена');
         }
 
+        await invalidateFoodCache();
         res.status(200).json({ food });
     } catch (error) {
         next(error);
@@ -107,6 +110,7 @@ export const updateFoodStock = async (req: Request, res: Response, next: NextFun
             throw new NotFoundError('Еда не найдена');
         }
 
+        await invalidateFoodCache();
         res.status(200).json({ food });
     } catch (error) {
         next(error);
@@ -132,6 +136,7 @@ export const updateFoodName = async (req: Request, res: Response, next: NextFunc
             throw new NotFoundError('Еда не найдена');
         }
 
+        await invalidateFoodCache();
         res.status(200).json({ food });
     } catch (error) {
         next(error);
@@ -159,6 +164,7 @@ export const updateFoodImage = async (req: Request, res: Response, next: NextFun
             { new: true }
         );
 
+        await invalidateFoodCache();
         res.status(200).json({ food: updatedFood });
     } catch (error) {
         next(error);
@@ -174,6 +180,7 @@ export const deleteFood = async (req: Request, res: Response, next: NextFunction
             throw new NotFoundError('Еда не найдена');
         }
 
+        await invalidateFoodCache();
         res.status(200).json({ message: 'Еда удалена успешно' });
     } catch (error) {
         next(error);
