@@ -4,7 +4,14 @@ import Order from "../modules/orderSchema.js";
 import Food from "../modules/FoodSchema.js";
 import { NotFoundError } from "../errors/not-found.js";
 import { BadRequestError } from "../errors/bad-request.js";
+import { UnauthorizedError } from "../errors/unauthorized.js";
 import { invalidateOrderCache } from "../utils/cache.js";
+
+const requireAdminOrWorker = (userRole: string | undefined): void => {
+  if (userRole !== 'admin' && userRole !== 'worker') {
+    throw new UnauthorizedError('Только администратор или работник могут выполнять эту операцию');
+  }
+};
 
 interface OrderItem {
     food: string;
@@ -96,6 +103,8 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
 
 export const getAllOrders = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        requireAdminOrWorker(res.locals.userRole);
+        
         const orders = await Order.find().populate('items.food').sort({ created_at: -1 });
         res.status(200).json({ orders });
     } catch (error) {
@@ -105,6 +114,8 @@ export const getAllOrders = async (req: Request, res: Response, next: NextFuncti
 
 export const updateOrderStatus = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        requireAdminOrWorker(res.locals.userRole);
+        
         const { id } = req.params;
         const { status } = req.body;
 

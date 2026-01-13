@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { UserRole } from '../constants/auth';
 import { AuthContext } from './authContext';
+import { login as loginApi, logout as logoutApi, getCurrentUser } from '../api/auth';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<{ role: UserRole } | null>(() => {
@@ -19,6 +20,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   });
 
   useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { user: currentUser } = await getCurrentUser();
+        setUser(currentUser);
+      } catch {
+        setUser(null);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
     if (user) {
       localStorage.setItem('auth_user', JSON.stringify(user));
     } else {
@@ -26,20 +40,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user]);
 
-  const login = (login: string, password: string): boolean => {
-    if (login === 'admin' && password === 'admin123') {
-      setUser({ role: 'admin' });
+  const login = async (login: string, password: string): Promise<boolean> => {
+    try {
+      const { user: loggedInUser } = await loginApi(login, password);
+      setUser(loggedInUser);
       return true;
+    } catch (error) {
+      console.error('Ошибка входа:', error);
+      return false;
     }
-    if (login === 'worker' && password === 'worker123') {
-      setUser({ role: 'worker' });
-      return true;
-    }
-    return false;
   };
 
-  const logout = () => {
-    setUser(null);
+  const logout = async () => {
+    try {
+      await logoutApi();
+    } catch (error) {
+      console.error('Ошибка выхода:', error);
+    } finally {
+      setUser(null);
+    }
   };
 
   return (

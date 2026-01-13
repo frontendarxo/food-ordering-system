@@ -3,8 +3,8 @@ import type { UserRole } from '../constants/auth';
 
 export interface AuthContextType {
   user: { role: UserRole } | null;
-  login: (login: string, password: string) => boolean;
-  logout: () => void;
+  login: (login: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
 }
 

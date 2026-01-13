@@ -2,7 +2,14 @@ import type { NextFunction, Request, Response } from "express"
 import Food from "../modules/FoodSchema.js"
 import { NotFoundError } from "../errors/not-found.js";
 import { BadRequestError } from "../errors/bad-request.js";
+import { UnauthorizedError } from "../errors/unauthorized.js";
 import { invalidateFoodCache } from "../utils/cache.js";
+
+const requireAdmin = (userRole: string | undefined): void => {
+  if (userRole !== 'admin') {
+    throw new UnauthorizedError('Только администратор может выполнять эту операцию');
+  }
+};
 
 export const getAllFoods = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -31,6 +38,8 @@ export const getFoodByCategory = async (req: Request, res: Response, next: NextF
 
 export const createFood = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        requireAdmin(res.locals.userRole);
+        
         const { name, price, category, inStock } = req.body;
         const file = req.file;
 
@@ -67,6 +76,8 @@ export const createFood = async (req: Request, res: Response, next: NextFunction
 
 export const updateFoodPrice = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        requireAdmin(res.locals.userRole);
+        
         const { id } = req.params;
         const { price } = req.body;
 
@@ -93,6 +104,8 @@ export const updateFoodPrice = async (req: Request, res: Response, next: NextFun
 
 export const updateFoodStock = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        requireAdmin(res.locals.userRole);
+        
         const { id } = req.params;
         const { inStock } = req.body;
 
@@ -119,6 +132,8 @@ export const updateFoodStock = async (req: Request, res: Response, next: NextFun
 
 export const updateFoodName = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        requireAdmin(res.locals.userRole);
+        
         const { id } = req.params;
         const { name } = req.body;
 
@@ -145,6 +160,8 @@ export const updateFoodName = async (req: Request, res: Response, next: NextFunc
 
 export const updateFoodImage = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        requireAdmin(res.locals.userRole);
+        
         const { id } = req.params;
         const file = req.file;
 
@@ -173,6 +190,8 @@ export const updateFoodImage = async (req: Request, res: Response, next: NextFun
 
 export const deleteFood = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        requireAdmin(res.locals.userRole);
+        
         const { id } = req.params;
         const food = await Food.findByIdAndDelete(id);
 

@@ -2,6 +2,5 @@ DOCKER_SETUP.md
 .Dockerignore
 .Dockerfile
 docker-compose.yml
-env.example
 .env
 .env.local
