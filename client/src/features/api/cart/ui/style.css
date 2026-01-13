@@ -419,8 +419,28 @@
   gap: 0.5rem;
 }
 
-.order-modal-field span::before {
+.order-modal-field-phone span::before {
+  content: '📞';
+  font-size: 1.2rem;
+}
+
+.order-modal-field-location span::before {
+  content: '📍';
+  font-size: 1.2rem;
+}
+
+.order-modal-field-delivery span::before {
+  content: '🚚';
+  font-size: 1.2rem;
+}
+
+.order-modal-field-address span::before {
   content: '🏠';
+  font-size: 1.2rem;
+}
+
+.order-modal-field-payment span::before {
+  content: '💳';
   font-size: 1.2rem;
 }
 

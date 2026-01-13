@@ -141,7 +141,7 @@ export const CartTotal = ({ items }: CartTotalProps) => {
               </button>
             </div>
             <div className="order-modal-body">
-              <label className="order-modal-field">
+              <label className="order-modal-field order-modal-field-phone">
                 <span>Номер телефона</span>
                 <input
                   type="tel"
@@ -152,7 +152,7 @@ export const CartTotal = ({ items }: CartTotalProps) => {
                 />
               </label>
 
-              <div className="order-modal-field">
+              <div className="order-modal-field order-modal-field-location">
                 {!isChangingLocation ? (
                   <div className="order-modal-location-info">
                     <span className="order-modal-location-text">
@@ -167,7 +167,7 @@ export const CartTotal = ({ items }: CartTotalProps) => {
                     </button>
                   </div>
                 ) : (
-                  <div className="order-modal-field">
+                  <div className="order-modal-field order-modal-field-location">
                     <span>Выберите местность заказа</span>
                     <div className="order-modal-radio-group">
                       <label className="order-modal-radio">
@@ -195,7 +195,7 @@ export const CartTotal = ({ items }: CartTotalProps) => {
                 )}
               </div>
 
-              <label className="order-modal-field">
+              <label className="order-modal-field order-modal-field-delivery">
                 <span>Способ получения</span>
                 <div className="order-modal-radio-group">
                   <label className="order-modal-radio">
@@ -222,7 +222,7 @@ export const CartTotal = ({ items }: CartTotalProps) => {
               </label>
 
               {deliveryMethod === 'доставка' && (
-                <label className="order-modal-field">
+                <label className="order-modal-field order-modal-field-address">
                   <span>Адрес доставки</span>
                   <input
                     type="text"
@@ -233,7 +233,7 @@ export const CartTotal = ({ items }: CartTotalProps) => {
                 </label>
               )}
 
-              <label className="order-modal-field">
+              <label className="order-modal-field order-modal-field-payment">
                 <span>Способ оплаты</span>
                 <div className="order-modal-radio-group">
                   <label className="order-modal-radio">
