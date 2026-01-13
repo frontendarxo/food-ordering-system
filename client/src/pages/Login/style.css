@@ -83,3 +83,9 @@
   letter-spacing: 2px;
 }
 
+.login-footer {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
+

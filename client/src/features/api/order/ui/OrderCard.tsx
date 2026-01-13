@@ -94,6 +94,14 @@ export const OrderCard = ({ order }: OrderCardProps) => {
               <span className="order-card-info-label">Способ оплаты:</span>
               <span className="order-card-info-value">{getPaymentMethodText(order.paymentMethod)}</span>
             </div>
+            {order.location && (
+              <div className="order-card-info-item">
+                <span className="order-card-info-label">📍 Локация:</span>
+                <span className="order-card-info-value">
+                  {order.location === 'шатой' ? 'Шатой' : 'Гикало'}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="order-card-items">

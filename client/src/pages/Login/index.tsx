@@ -59,6 +59,11 @@ export const Login = () => {
           {error && <div className="login-error">{error}</div>}
           <Button type="submit">Войти</Button>
         </form>
+        <div className="login-footer">
+          <Button type="button" onClick={() => navigate('/')}>
+            На главное меню
+          </Button>
+        </div>
       </div>
     </div>
   );

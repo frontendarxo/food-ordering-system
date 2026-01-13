@@ -55,6 +55,11 @@ const orderSchema = new Schema({
         enum: ['наличка', 'карта'],
         required: true
     },
+    location: {
+        type: String,
+        enum: ['шатой', 'гикало'],
+        required: true
+    },
     status: {
         type: String,
         enum: ['pending', 'confirmed', 'cancelled'],

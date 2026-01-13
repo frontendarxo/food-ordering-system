@@ -1,5 +1,4 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useAuth } from '../../contexts/useAuth';
 import { getAllOrders } from '../../api/order';
 import { formatPrice } from '../../features/api/cart/lib';
 import { getDeliveryMethodText, getPaymentMethodText } from '../../features/api/order/lib';
@@ -48,6 +47,7 @@ interface Filters {
   date: FilterDate;
   deliveryMethod: Order['deliveryMethod'] | 'all';
   paymentMethod: Order['paymentMethod'] | 'all';
+  location: Order['location'] | 'all';
 }
 
 export const AdminOrders = () => {
@@ -60,10 +60,12 @@ export const AdminOrders = () => {
     date: 'all',
     deliveryMethod: 'all',
     paymentMethod: 'all',
+    location: 'all',
   });
 
   useEffect(() => {
     loadOrders();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadOrders = async () => {
@@ -101,6 +103,10 @@ export const AdminOrders = () => {
       }
 
       if (filters.paymentMethod !== 'all' && order.paymentMethod !== filters.paymentMethod) {
+        return false;
+      }
+
+      if (filters.location !== 'all' && order.location !== filters.location) {
         return false;
       }
 
@@ -148,6 +154,7 @@ export const AdminOrders = () => {
       date: 'all',
       deliveryMethod: 'all',
       paymentMethod: 'all',
+      location: 'all',
     });
     setCurrentPage(1);
   };
@@ -157,7 +164,8 @@ export const AdminOrders = () => {
       filters.status !== 'all' ||
       filters.date !== 'all' ||
       filters.deliveryMethod !== 'all' ||
-      filters.paymentMethod !== 'all'
+      filters.paymentMethod !== 'all' ||
+      filters.location !== 'all'
     );
   }, [filters]);
 
@@ -283,6 +291,19 @@ export const AdminOrders = () => {
                 </select>
               </div>
 
+              <div className="admin-orders-filter-group">
+                <label className="admin-orders-filter-label">Локация</label>
+                <select
+                  className="admin-orders-filter-select"
+                  value={filters.location}
+                  onChange={(e) => handleFilterChange('location', e.target.value)}
+                >
+                  <option value="all">Все</option>
+                  <option value="шатой">📍 Шатой</option>
+                  <option value="гикало">📍 Гикало</option>
+                </select>
+              </div>
+
               {hasActiveFilters && (
                 <button
                   className="admin-orders-filter-reset"
@@ -364,6 +385,9 @@ export const AdminOrders = () => {
                         <p><strong>Адрес:</strong> {order.address}</p>
                       )}
                       <p><strong>Способ оплаты:</strong> {getPaymentMethodText(order.paymentMethod)}</p>
+                      {order.location && (
+                        <p><strong>📍 Локация:</strong> {order.location === 'шатой' ? 'Шатой' : 'Гикало'}</p>
+                      )}
                     </div>
 
                     <div className="admin-order-card-detail-section">

@@ -12,7 +12,7 @@ interface OrderItem {
 
 export const createOrder = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { phoneNumber, items, deliveryMethod, address, paymentMethod } = req.body;
+        const { phoneNumber, items, deliveryMethod, address, paymentMethod, location } = req.body;
         
         if (!phoneNumber) {
             throw new BadRequestError('Номер телефона обязателен');
@@ -37,6 +37,10 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
 
         if (!paymentMethod || !['наличка', 'карта'].includes(paymentMethod)) {
             throw new BadRequestError('Метод оплаты обязателен');
+        }
+
+        if (!location || !['шатой', 'гикало'].includes(location)) {
+            throw new BadRequestError('Локация обязательна');
         }
 
         const foodIds = items.map((item: OrderItem) => item.food);
@@ -66,7 +70,8 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
             items: orderItems,
             total,
             deliveryMethod,
-            paymentMethod
+            paymentMethod,
+            location
         };
 
         if (deliveryMethod === 'доставка') {

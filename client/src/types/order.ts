@@ -14,6 +14,7 @@ export interface Order {
   deliveryMethod: 'самовызов' | 'доставка';
   address?: string;
   paymentMethod: 'наличка' | 'карта';
+  location: 'шатой' | 'гикало';
   status: 'pending' | 'confirmed' | 'cancelled';
   created_at: string;
   statusChangedAt?: string;

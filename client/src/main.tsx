@@ -6,6 +6,7 @@ import App from './app/App.tsx'
 import { Provider } from 'react-redux'
 import { store } from './store/store.ts'
 import { AuthProvider } from './contexts/AuthContext.tsx'
+import { LocationProvider } from './contexts/LocationContext.tsx'
 import { ErrorBoundary } from './shared/ErrorBoundary'
 
 createRoot(document.getElementById('root')!).render(
@@ -13,9 +14,11 @@ createRoot(document.getElementById('root')!).render(
     <ErrorBoundary>
       <BrowserRouter>
         <Provider store={store}>
-          <AuthProvider>
-            <App />
-          </AuthProvider>
+          <LocationProvider>
+            <AuthProvider>
+              <App />
+            </AuthProvider>
+          </LocationProvider>
         </Provider>
       </BrowserRouter>
     </ErrorBoundary>

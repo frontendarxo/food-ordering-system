@@ -20,6 +20,7 @@ interface CreateOrderData {
   deliveryMethod: 'самовызов' | 'доставка';
   address?: string;
   paymentMethod: 'наличка' | 'карта';
+  location: 'шатой' | 'гикало';
 }
 
 

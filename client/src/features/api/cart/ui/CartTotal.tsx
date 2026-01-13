@@ -3,7 +3,9 @@ import { calculateTotal, formatPrice } from '../lib';
 import { useCartActions } from '../model';
 import { useAppDispatch } from '../../../../store/hooks';
 import { create } from '../../../../store/slices/orderSlice';
+import { useLocation } from '../../../../contexts/useLocation';
 import { useState } from 'react';
+import type { Location } from '../../../../contexts/locationContext';
 import './style.css';
 
 interface CartTotalProps {
@@ -14,23 +16,34 @@ export const CartTotal = ({ items }: CartTotalProps) => {
   const total = calculateTotal(items);
   const { clearCart } = useCartActions();
   const dispatch = useAppDispatch();
+  const { location, setLocation } = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [isChangingLocation, setIsChangingLocation] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [deliveryMethod, setDeliveryMethod] = useState<'самовызов' | 'доставка'>('доставка');
   const [address, setAddress] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'наличка' | 'карта'>('наличка');
 
   const handleOpenModal = () => {
+    if (!location) {
+      return;
+    }
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setIsChangingLocation(false);
     setPhoneNumber('');
     setDeliveryMethod('доставка');
     setAddress('');
     setPaymentMethod('наличка');
+  };
+
+  const handleLocationChange = (newLocation: Location) => {
+    setLocation(newLocation);
+    setIsChangingLocation(false);
   };
 
   const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,6 +83,10 @@ export const CartTotal = ({ items }: CartTotalProps) => {
       quantity: item.quantity
     }));
 
+    if (!location) {
+      return;
+    }
+
     try {
       setIsCreating(true);
       await dispatch(create({
@@ -77,7 +94,8 @@ export const CartTotal = ({ items }: CartTotalProps) => {
         items: orderItems,
         deliveryMethod,
         address: deliveryMethod === 'доставка' ? address.trim() : undefined,
-        paymentMethod
+        paymentMethod,
+        location
       })).unwrap();
       clearCart();
       setIsModalOpen(false);
@@ -107,7 +125,7 @@ export const CartTotal = ({ items }: CartTotalProps) => {
         <button
           className="cart-total-button"
           onClick={handleOpenModal}
-          disabled={items.length === 0}
+          disabled={items.length === 0 || !location}
         >
           Оформить заказ
         </button>
@@ -133,6 +151,49 @@ export const CartTotal = ({ items }: CartTotalProps) => {
                   autoFocus
                 />
               </label>
+
+              <div className="order-modal-field">
+                {!isChangingLocation ? (
+                  <div className="order-modal-location-info">
+                    <span className="order-modal-location-text">
+                      Вы выбрали местность заказа: <strong>{location === 'шатой' ? 'Шатой' : 'Гикало'}</strong>
+                    </span>
+                    <button
+                      type="button"
+                      className="order-modal-location-change"
+                      onClick={() => setIsChangingLocation(true)}
+                    >
+                      Изменить?
+                    </button>
+                  </div>
+                ) : (
+                  <div className="order-modal-field">
+                    <span>Выберите местность заказа</span>
+                    <div className="order-modal-radio-group">
+                      <label className="order-modal-radio">
+                        <input
+                          type="radio"
+                          name="location"
+                          value="шатой"
+                          checked={location === 'шатой'}
+                          onChange={() => handleLocationChange('шатой')}
+                        />
+                        <span>Шатой</span>
+                      </label>
+                      <label className="order-modal-radio">
+                        <input
+                          type="radio"
+                          name="location"
+                          value="гикало"
+                          checked={location === 'гикало'}
+                          onChange={() => handleLocationChange('гикало')}
+                        />
+                        <span>Гикало</span>
+                      </label>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               <label className="order-modal-field">
                 <span>Способ получения</span>
@@ -167,7 +228,7 @@ export const CartTotal = ({ items }: CartTotalProps) => {
                     type="text"
                     value={address}
                     onChange={handleAddressChange}
-                    placeholder="Введите адрес доставки"
+                    placeholder={location === 'шатой' ? 'село, улица' : 'Введите адрес доставки'}
                   />
                 </label>
               )}

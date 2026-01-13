@@ -356,6 +356,58 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.order-modal-field:last-child {
+  margin-bottom: 0;
+}
+
+.order-modal-location-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background-color: rgba(138, 21, 56, 0.05);
+  border: 2px solid rgba(138, 21, 56, 0.1);
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+
+.order-modal-location-text {
+  color: #333;
+  font-size: 1rem;
+  flex: 1;
+  min-width: 200px;
+}
+
+.order-modal-location-text strong {
+  color: #8A1538;
+  font-weight: 700;
+}
+
+.order-modal-location-change {
+  background: #8A1538;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.order-modal-location-change:hover {
+  background: #a01a45;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(138, 21, 56, 0.3);
+}
+
+.order-modal-location-change:active {
+  transform: translateY(0);
 }
 
 .order-modal-field span {
