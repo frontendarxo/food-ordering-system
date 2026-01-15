@@ -32,6 +32,7 @@ export const createOrder = async (orderData: CreateOrderData) => {
 
 export const getAllOrders = async (): Promise<{ orders: Order[] }> => {
     const response = await fetch(`${BASE_URL}/orders`, {
+        credentials: 'include',
         headers: getHeaders(),
     });
     
@@ -45,6 +46,7 @@ export const getAllOrders = async (): Promise<{ orders: Order[] }> => {
 export const updateOrderStatus = async (id: string, status: string) => {
     const response = await fetch(`${BASE_URL}/orders/${id}/status`, {
         method: 'PATCH',
+        credentials: 'include',
         headers: getHeaders(),
         body: JSON.stringify({ status }),
     });

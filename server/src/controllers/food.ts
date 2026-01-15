@@ -11,6 +11,12 @@ const requireAdmin = (userRole: string | undefined): void => {
   }
 };
 
+const requireAdminOrWorker = (userRole: string | undefined): void => {
+  if (userRole !== 'admin' && userRole !== 'worker') {
+    throw new UnauthorizedError('Только администратор или работник могут выполнять эту операцию');
+  }
+};
+
 export const getAllFoods = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const foods = await Food.find();
@@ -104,7 +110,7 @@ export const updateFoodPrice = async (req: Request, res: Response, next: NextFun
 
 export const updateFoodStock = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        requireAdmin(res.locals.userRole);
+        requireAdminOrWorker(res.locals.userRole);
         
         const { id } = req.params;
         const { inStock } = req.body;

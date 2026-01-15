@@ -38,6 +38,7 @@ export const createFood = async (foodData: {
 
     const response = await fetch(`${BASE_URL}/foods`, {
         method: 'POST',
+        credentials: 'include',
         body: formData,
     });
     
@@ -51,6 +52,7 @@ export const createFood = async (foodData: {
 export const updateFoodPrice = async (id: string, price: number): Promise<{ food: Food }> => {
     const response = await fetch(`${BASE_URL}/foods/${id}/price`, {
         method: 'PATCH',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
         },
@@ -67,6 +69,7 @@ export const updateFoodPrice = async (id: string, price: number): Promise<{ food
 export const updateFoodStock = async (id: string, inStock: boolean): Promise<{ food: Food }> => {
     const response = await fetch(`${BASE_URL}/foods/${id}/stock`, {
         method: 'PATCH',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
         },
@@ -83,6 +86,7 @@ export const updateFoodStock = async (id: string, inStock: boolean): Promise<{ f
 export const updateFoodName = async (id: string, name: string): Promise<{ food: Food }> => {
     const response = await fetch(`${BASE_URL}/foods/${id}/name`, {
         method: 'PATCH',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
         },
@@ -102,6 +106,7 @@ export const updateFoodImage = async (id: string, image: File): Promise<{ food: 
 
     const response = await fetch(`${BASE_URL}/foods/${id}/image`, {
         method: 'PATCH',
+        credentials: 'include',
         body: formData,
     });
     
@@ -115,6 +120,7 @@ export const updateFoodImage = async (id: string, image: File): Promise<{ food: 
 export const deleteFood = async (id: string) => {
     const response = await fetch(`${BASE_URL}/foods/${id}`, {
         method: 'DELETE',
+        credentials: 'include',
     });
     
     if (!response.ok) {
