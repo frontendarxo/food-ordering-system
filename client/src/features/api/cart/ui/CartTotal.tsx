@@ -6,6 +6,7 @@ import { create } from '../../../../store/slices/orderSlice';
 import { useLocation } from '../../../../contexts/useLocation';
 import { useState } from 'react';
 import type { Location } from '../../../../contexts/locationContext';
+import { sendOrderToWhatsApp } from '../../../../utils/whatsapp';
 import './style.css';
 
 interface CartTotalProps {
@@ -97,6 +98,16 @@ export const CartTotal = ({ items }: CartTotalProps) => {
         paymentMethod,
         location
       })).unwrap();
+      
+      sendOrderToWhatsApp({
+        phoneNumber: numberStr,
+        total,
+        deliveryMethod,
+        address: deliveryMethod === 'доставка' ? address.trim() : undefined,
+        paymentMethod,
+        location
+      });
+      
       clearCart();
       setIsModalOpen(false);
       setPhoneNumber('');
