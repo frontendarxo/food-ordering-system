@@ -114,3 +114,18 @@ export const updateOrderStatus = (req, res, next) => __awaiter(void 0, void 0, v
         next(error);
     }
 });
+export const deleteOrder = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        requireAdminOrWorker(res.locals.userRole);
+        const { id } = req.params;
+        const order = yield Order.findByIdAndDelete(id);
+        if (!order) {
+            throw new NotFoundError('Заказ не найден');
+        }
+        yield invalidateOrderCache();
+        res.status(200).json({ message: 'Заказ удален', orderId: id });
+    }
+    catch (error) {
+        next(error);
+    }
+});

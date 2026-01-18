@@ -58,4 +58,18 @@ export const updateOrderStatus = async (id: string, status: string) => {
     return response.json();
 };
 
+export const deleteOrder = async (id: string) => {
+    const response = await fetch(`${BASE_URL}/orders/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+        await handleApiError(response, 'Ошибка удаления заказа');
+    }
+
+    return response.json();
+};
+
 

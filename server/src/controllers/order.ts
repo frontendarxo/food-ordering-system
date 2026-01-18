@@ -142,3 +142,21 @@ export const updateOrderStatus = async (req: Request, res: Response, next: NextF
         next(error);
     }
 };
+
+export const deleteOrder = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        requireAdminOrWorker(res.locals.userRole);
+
+        const { id } = req.params;
+        const order = await Order.findByIdAndDelete(id);
+
+        if (!order) {
+            throw new NotFoundError('Заказ не найден');
+        }
+
+        await invalidateOrderCache();
+        res.status(200).json({ message: 'Заказ удален', orderId: id });
+    } catch (error) {
+        next(error);
+    }
+};
