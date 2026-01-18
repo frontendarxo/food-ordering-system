@@ -29,4 +29,3 @@ export const OrderList = ({ orders }: OrderListProps) => {
     </div>
   );
 };
-

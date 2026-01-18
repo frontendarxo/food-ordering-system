@@ -167,7 +167,7 @@ export const CartTotal = ({ items }: CartTotalProps) => {
                 {!isChangingLocation ? (
                   <div className="order-modal-location-info">
                     <span className="order-modal-location-text">
-                      Вы выбрали местность заказа: <strong>{location === 'шатой' ? 'Шатой' : 'Гикало'}</strong>
+                      Вы выбрали местность: <strong>{location === 'шатой' ? 'Шатой' : 'Гикало'}</strong>
                     </span>
                     <button
                       type="button"
