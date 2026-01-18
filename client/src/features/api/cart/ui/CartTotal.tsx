@@ -129,8 +129,8 @@ export const CartTotal = ({ items }: CartTotalProps) => {
   return (
     <>
       <div className="cart-total">
+      <h3 className="cart-total-label">Итого:</h3>
         <div className="cart-total-content">
-          <div className="cart-total-label">Итого:</div>
           <div className="cart-total-value">{formatPrice(total)}</div>
         </div>
         <button

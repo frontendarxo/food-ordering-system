@@ -1,7 +1,5 @@
 .cart {
   padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
   min-height: calc(100vh - 200px);
 }
 
@@ -71,3 +69,9 @@
   margin-bottom: 0.5rem;
 }
 
+@media (min-width: 768px) {
+  .cart {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
