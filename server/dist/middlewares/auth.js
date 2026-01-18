@@ -24,6 +24,6 @@ export const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0
         next();
     }
     catch (error) {
-        throw new UnauthorizedError('Недействительный токен');
+        next(new UnauthorizedError('Недействительный токен'));
     }
 });

@@ -45,16 +45,16 @@ export const Navbar = () => {
           )}
           {isAuthenticated && (
             <>
-              {user?.role === 'worker' && (
+              {user?.role === 'admin' && (
                 <li>
-                  <Link to="/worker" onClick={closeMenu}>
+                  <Link to="/admin/orders" onClick={closeMenu}>
                     Заказы
                   </Link>
                 </li>
               )}
-              {user?.role === 'admin' && (
+              {user?.role === 'worker' && (
                 <li>
-                  <Link to="/admin/orders" onClick={closeMenu}>
+                  <Link to="/worker" onClick={closeMenu}>
                     Заказы
                   </Link>
                 </li>

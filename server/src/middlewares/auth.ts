@@ -23,6 +23,6 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
         req.userRole = decoded.role;
         next();
     } catch (error) {
-        throw new UnauthorizedError('Недействительный токен');
+        next(new UnauthorizedError('Недействительный токен'));
     }
 };
