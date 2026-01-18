@@ -1,7 +1,7 @@
 .food-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
   margin-top: 2rem;
 }
 
@@ -10,6 +10,10 @@
   padding: 3rem;
   color: white;
   font-size: 1.2rem;
+}
+
+.food-card-wrapper {
+  position: relative;
 }
 
 .food-card {
@@ -406,12 +410,15 @@
 .food-card-notification {
   position: fixed;
   top: 20px;
-  right: 20px;
-  background: linear-gradient(135deg, #8A1538 0%, #a01a45 100%);
+  left: 20px;
+  max-width: 280px;
+  width: auto;
+  white-space: nowrap;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
   color: white;
-  padding: 1rem 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(138, 21, 56, 0.4);
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.5);
   z-index: 1000;
   font-weight: 600;
   font-size: 1rem;
@@ -451,7 +458,6 @@
 @media (max-width: 768px) {
   .food-card-notification {
     top: 10px;
-    right: 10px;
     left: 10px;
     padding: 0.875rem 1.25rem;
     font-size: 0.95rem;
@@ -1244,6 +1250,10 @@
 
 .delete-confirm-button:active:not(:disabled) {
   transform: translateY(0);
+}
+
+.food-list-empty-icon {
+  font-size: 4rem;
 }
 
 @media (max-width: 768px) {

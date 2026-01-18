@@ -13,7 +13,7 @@ export const FoodList = ({ foods, selectedCategory }: FoodListProps) => {
   const isAdmin = user?.role === 'admin';
   const isWorker = user?.role === 'worker';
 
-  if (foods.length === 0) {
+  if (foods.length === 0 || !foods || foods.length === undefined) {
     return (
       <div className="food-list-empty">
         <div className="food-list-empty-icon">🍽️</div>
