@@ -37,5 +37,5 @@ export const sendOrderToWhatsApp = (orderData: OrderData) => {
   const encodedMessage = encodeURIComponent(message);
   const whatsappUrl = `https://wa.me/${whatsappPhone.replace(/[^0-9]/g, '')}?text=${encodedMessage}`;
   
-  window.open(whatsappUrl, '_blank');
+  window.location.href = whatsappUrl;
 };
