@@ -57,15 +57,17 @@ export const Worker = () => {
 
   return (
     <div className="worker-page">
-      <div className="worker-header">
-        <h1>Заказы</h1>
-      </div>
+      {recentOrders.length > 0 && (
+        <div className="worker-header">
+          <h1>Заказы</h1>
+        </div>
+      )}
 
       {recentOrders.length === 0 ? (
         <div className="worker-empty">
-          <div className="worker-empty-icon">📦</div>
-          <h2>Нет заказов</h2>
-          <p>{orders.length === 0 ? 'Заказы будут отображаться здесь' : 'Нет заказов за последние 24 часа'}</p>
+          <div className="worker-empty-icon">✨</div>
+          <h2>Заказов сегодня не было</h2>
+          <p>Отличный повод немного отдохнуть! 😊</p>
         </div>
       ) : (
         <div className="worker-orders">

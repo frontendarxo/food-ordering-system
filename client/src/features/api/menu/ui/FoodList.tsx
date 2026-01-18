@@ -11,9 +11,24 @@ interface FoodListProps {
 export const FoodList = ({ foods, selectedCategory }: FoodListProps) => {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
+  const isWorker = user?.role === 'worker';
 
-  if (foods.length === 0 && !isAdmin) {
-    return <div className="food-list-empty">Товары не найдены</div>;
+  if (foods.length === 0) {
+    return (
+      <div className="food-list-empty">
+        <div className="food-list-empty-icon">🍽️</div>
+        <h2 className="food-list-empty-title">
+          {isAdmin ? 'Меню пусто' : 'Меню пока пусто'}
+        </h2>
+        <p className="food-list-empty-message">
+          {isAdmin
+            ? 'Начните добавлять блюда в меню, используя кнопку "Добавить карточку"'
+            : isWorker
+            ? 'В меню пока нет доступных блюд'
+            : 'В меню пока нет доступных блюд. Загляните позже!'}
+        </p>
+      </div>
+    );
   }
 
   return (

@@ -20,12 +20,12 @@ const initialState: MenuState = {
 
 export const fetchAllMenu = createAsyncThunk('menu/fetchAll', async () => {
   const response = await getAllMenu();
-  return response.foods;
+  return response.foods || [];
 });
 
 export const fetchCategory = createAsyncThunk('menu/fetchCategory', async (category: string) => {
   const response = await getCategory(category);
-  return response.foods;
+  return response.foods || [];
 });
 
 const menuSlice = createSlice({
@@ -47,12 +47,10 @@ const menuSlice = createSlice({
       })
       .addCase(fetchAllMenu.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.foods = action.payload;
-        state.categories = [
-          ...new Set(
-            (action.payload as Food[]).map((food) => food.category)
-          )
-        ];
+        state.foods = action.payload || [];
+        state.categories = action.payload && action.payload.length > 0
+          ? [...new Set((action.payload as Food[]).map((food) => food.category))]
+          : [];
       })
       .addCase(fetchAllMenu.rejected, (state, action) => {
         state.isLoading = false;
@@ -64,7 +62,7 @@ const menuSlice = createSlice({
       })
       .addCase(fetchCategory.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.foods = action.payload;
+        state.foods = action.payload || [];
       })
       .addCase(fetchCategory.rejected, (state, action) => {
         state.isLoading = false;

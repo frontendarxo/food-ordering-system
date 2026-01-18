@@ -25,9 +25,6 @@ const requireAdminOrWorker = (userRole) => {
 export const getAllFoods = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const foods = yield Food.find();
-        if (foods.length === 0) {
-            throw new NotFoundError('Foods not found');
-        }
         res.status(200).json({ foods });
     }
     catch (error) {
@@ -38,9 +35,6 @@ export const getFoodByCategory = (req, res, next) => __awaiter(void 0, void 0, v
     try {
         const { category } = req.params;
         const foods = yield Food.find({ category: category });
-        if (foods.length === 0) {
-            throw new NotFoundError('Foods not found');
-        }
         res.status(200).json({ foods });
     }
     catch (error) {
