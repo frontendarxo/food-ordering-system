@@ -3,13 +3,20 @@ import { handleApiError } from './utils';
 import type { Food } from '../types/food';
 
 export const getAllMenu = async () => {
-    const response = await fetch(`${BASE_URL}/foods`);
-    
-    if (!response.ok) {
-        await handleApiError(response, 'Ошибка загрузки меню');
+    try {
+        const response = await fetch(`${BASE_URL}/foods`, {
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            await handleApiError(response, 'Ошибка загрузки меню');
+        }
+        
+        return response.json();
+    } catch (error) {
+        console.error('Ошибка при запросе getAllMenu:', error);
+        throw error;
     }
-    
-    return response.json();
 };
 
 export const getCategory = async (category: string) => {

@@ -11,6 +11,15 @@ import { ConflictError } from "../errors/conflict.js";
 import Categories from "../modules/categoriesSchema.js";
 import { BadRequestError } from "../errors/bad-request.js";
 import { NotFoundError } from "../errors/not-found.js";
+export const getAllCategories = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const categories = yield Categories.find({}).select('_id name');
+        res.status(200).json(categories);
+    }
+    catch (error) {
+        next(error);
+    }
+});
 export const createCategory = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { name } = req.body;
@@ -38,13 +47,17 @@ export const updateCategory = (req, res, next) => __awaiter(void 0, void 0, void
             throw new BadRequestError('Название категории обязательно');
         }
         const trimmedName = name.trim();
-        const existingCategory = yield Categories.findOne({ name: trimmedName });
+        const categoryToUpdate = yield Categories.findById(id);
+        if (!categoryToUpdate) {
+            throw new NotFoundError('Категория не найдена');
+        }
+        const existingCategory = yield Categories.findOne({ name: trimmedName, _id: { $ne: id } });
         if (existingCategory) {
             throw new ConflictError('Категория с таким названием уже существует');
         }
-        const category = yield Categories.findByIdAndUpdate(id, { name: trimmedName });
-        yield (category === null || category === void 0 ? void 0 : category.save());
-        res.status(204).json({ message: 'Категория обновлена успешно', category: category === null || category === void 0 ? void 0 : category.name });
+        categoryToUpdate.name = trimmedName;
+        yield categoryToUpdate.save();
+        res.status(200).json({ message: 'Категория обновлена успешно', category: categoryToUpdate.name });
     }
     catch (error) {
         next(error);

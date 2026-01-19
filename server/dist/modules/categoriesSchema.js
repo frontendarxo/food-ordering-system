@@ -13,7 +13,7 @@ const categoriesSchema = new Schema({
     foods: {
         type: [Schema.Types.ObjectId],
         ref: 'Food',
-        required: true
+        default: []
     }
 });
 const Categories = model('Categories', categoriesSchema);
