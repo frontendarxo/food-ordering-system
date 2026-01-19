@@ -19,8 +19,6 @@ export const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0
         const decoded = jwt.verify(token, JWT_SECRET);
         res.locals.userId = decoded.userId;
         res.locals.userRole = decoded.role;
-        req.userId = decoded.userId;
-        req.userRole = decoded.role;
         next();
     }
     catch (error) {

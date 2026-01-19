@@ -7,43 +7,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import Category from "../modules/CategorySchema.js";
-import Food from "../modules/FoodSchema.js";
-import { NotFoundError } from "../errors/not-found.js";
-import { BadRequestError } from "../errors/bad-request.js";
-import { UnauthorizedError } from "../errors/unauthorized.js";
 import { ConflictError } from "../errors/conflict.js";
-import { invalidateFoodCache } from "../utils/cache.js";
-const requireAdmin = (userRole) => {
-    if (userRole !== 'admin') {
-        throw new UnauthorizedError('Только администратор может выполнять эту операцию');
-    }
-};
-export const getAllCategories = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const categories = yield Category.find().sort({ name: 1 });
-        res.status(200).json({ categories: categories.map(c => c.name) });
-    }
-    catch (error) {
-        next(error);
-    }
-});
+import Categories from "../modules/categoriesSchema.js";
+import { BadRequestError } from "../errors/bad-request.js";
+import { NotFoundError } from "../errors/not-found.js";
 export const createCategory = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        requireAdmin(res.locals.userRole);
         const { name } = req.body;
         if (!name || typeof name !== 'string' || !name.trim()) {
             throw new BadRequestError('Название категории обязательно');
         }
         const trimmedName = name.trim();
-        const existingCategory = yield Category.findOne({ name: trimmedName });
+        const existingCategory = yield Categories.findOne({ name: trimmedName });
         if (existingCategory) {
             throw new ConflictError('Категория с таким названием уже существует');
         }
-        const category = new Category({ name: trimmedName });
+        const category = new Categories({ name: trimmedName });
         yield category.save();
-        yield invalidateFoodCache();
-        res.status(201).json({ category: category.name });
+        res.status(201).json({ message: 'Категория создана успешно', category: category.name });
     }
     catch (error) {
         next(error);
@@ -51,28 +32,19 @@ export const createCategory = (req, res, next) => __awaiter(void 0, void 0, void
 });
 export const updateCategory = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        requireAdmin(res.locals.userRole);
-        const { name: oldName } = req.params;
-        const { name: newName } = req.body;
-        if (!newName || typeof newName !== 'string' || !newName.trim()) {
-            throw new BadRequestError('Новое название категории обязательно');
+        const { id } = req.params;
+        const { name } = req.body;
+        if (!name || typeof name !== 'string' || !name.trim()) {
+            throw new BadRequestError('Название категории обязательно');
         }
-        const trimmedNewName = newName.trim();
-        if (trimmedNewName === oldName) {
-            throw new BadRequestError('Новое название должно отличаться от текущего');
-        }
-        const category = yield Category.findOne({ name: oldName });
-        if (!category) {
-            throw new NotFoundError('Категория не найдена');
-        }
-        const existingCategory = yield Category.findOne({ name: trimmedNewName });
+        const trimmedName = name.trim();
+        const existingCategory = yield Categories.findOne({ name: trimmedName });
         if (existingCategory) {
             throw new ConflictError('Категория с таким названием уже существует');
         }
-        yield Category.updateOne({ name: oldName }, { name: trimmedNewName });
-        yield Food.updateMany({ category: oldName }, { category: trimmedNewName });
-        yield invalidateFoodCache();
-        res.status(200).json({ category: trimmedNewName });
+        const category = yield Categories.findByIdAndUpdate(id, { name: trimmedName });
+        yield (category === null || category === void 0 ? void 0 : category.save());
+        res.status(204).json({ message: 'Категория обновлена успешно', category: category === null || category === void 0 ? void 0 : category.name });
     }
     catch (error) {
         next(error);
@@ -80,19 +52,12 @@ export const updateCategory = (req, res, next) => __awaiter(void 0, void 0, void
 });
 export const deleteCategory = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        requireAdmin(res.locals.userRole);
-        const { name } = req.params;
-        const category = yield Category.findOne({ name });
+        const { id } = req.params;
+        const category = yield Categories.findByIdAndDelete(id);
         if (!category) {
             throw new NotFoundError('Категория не найдена');
         }
-        const foodsCount = yield Food.countDocuments({ category: name });
-        if (foodsCount > 0) {
-            throw new BadRequestError(`Невозможно удалить категорию: в ней находится ${foodsCount} ${foodsCount === 1 ? 'блюдо' : 'блюд'}. Сначала переместите или удалите блюда.`);
-        }
-        yield Category.deleteOne({ name });
-        yield invalidateFoodCache();
-        res.status(200).json({ message: 'Категория удалена успешно' });
+        res.status(204).json({ message: 'Категория удалена успешно', category: category.name });
     }
     catch (error) {
         next(error);

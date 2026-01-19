@@ -16,7 +16,6 @@ export const FoodModal = ({ isOpen, onClose, selectedCategory }: FoodModalProps)
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState(selectedCategory === 'all' ? '' : selectedCategory);
-  const [isNewCategory, setIsNewCategory] = useState(false);
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [inStock, setInStock] = useState(true);
@@ -28,7 +27,6 @@ export const FoodModal = ({ isOpen, onClose, selectedCategory }: FoodModalProps)
       setName('');
       setPrice('');
       setCategory(selectedCategory === 'all' ? '' : selectedCategory);
-      setIsNewCategory(false);
       setImage(null);
       setImagePreview(null);
       setInStock(true);
@@ -143,63 +141,21 @@ export const FoodModal = ({ isOpen, onClose, selectedCategory }: FoodModalProps)
             />
           </div>
           <div className="food-modal-field">
-            <div className="food-modal-field-header">
-              <label htmlFor="category">Категория *</label>
-              {!isNewCategory && (
-                <button
-                  type="button"
-                  className="food-modal-new-category-button"
-                  onClick={() => {
-                    setIsNewCategory(true);
-                    setCategory('');
-                  }}
-                  disabled={isSubmitting}
-                >
-                  Новая категория?
-                </button>
-              )}
-            </div>
-            {isNewCategory ? (
-              <div className="food-modal-category-input-wrapper">
-                <input
-                  id="category"
-                  type="text"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  placeholder="Введите название новой категории"
-                  required
-                  disabled={isSubmitting}
-                  autoFocus
-                />
-                <button
-                  type="button"
-                  className="food-modal-category-cancel-button"
-                  onClick={() => {
-                    setIsNewCategory(false);
-                    setCategory(selectedCategory === 'all' ? '' : selectedCategory);
-                  }}
-                  disabled={isSubmitting}
-                  aria-label="Отменить создание новой категории"
-                >
-                  ✕
-                </button>
-              </div>
-            ) : (
-              <select
-                id="category"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                required
-                disabled={isSubmitting}
-              >
-                <option value="">Выберите категорию</option>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            )}
+            <label htmlFor="category">Категория *</label>
+            <select
+              id="category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              required
+              disabled={isSubmitting}
+            >
+              <option value="">Выберите категорию</option>
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="food-modal-field">
             <label htmlFor="image">Изображение *</label>

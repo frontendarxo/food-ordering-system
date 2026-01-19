@@ -10,7 +10,6 @@
     "prelightdeploy": "npm run build && scp -rC dist/ salakh@5.35.8.56:/home/salakh/qatar-app-be",
     "predeploy": "scp -rС .env.production salakh@5.35.8.56:/home/salakh/qatar-app-be/.env.production && scp -rС package.json salakh@5.35.8.56:/home/salakh/qatar-app-be/package.json && scp -rС package-lock.json salakh@5.35.8.56:/home/salakh/qatar-app-be/package-lock.json",
     "deploy": "npm run build && scp -rC dist/* salakh@5.35.8.56:/home/salakh/qatar-app-be",
-    "migrate:order-statuses": "tsx --tsconfig tsconfig.dev.json src/migrations/migrateOrderStatuses.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
