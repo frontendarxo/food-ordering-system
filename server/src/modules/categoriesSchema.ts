@@ -16,7 +16,7 @@ const categoriesSchema = new Schema({
     foods: {
         type: [Schema.Types.ObjectId],
         ref: 'Food',
-        required: true
+        default: []
     }
 })
 

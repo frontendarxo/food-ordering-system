@@ -35,7 +35,7 @@ export const CategoryModal = ({ isOpen, onClose }: CategoryModalProps) => {
 
     try {
       await createCategory(name.trim());
-      dispatch(fetchCategories());
+      await dispatch(fetchCategories());
       onClose();
     } catch (err: unknown) {
       if (err instanceof Error) {

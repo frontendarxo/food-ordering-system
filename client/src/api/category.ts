@@ -5,6 +5,9 @@ export const createCategory = async (name: string) => {
     try {
         const response = await fetch(`${BASE_URL}/categories`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({ name }),
             credentials: 'include'
         });
@@ -12,9 +15,9 @@ export const createCategory = async (name: string) => {
             await handleApiError(response, 'Ошибка создания категории');
         }
         return response.json();
-        
     } catch (error) {
         console.error(error);
+        throw error;
     }
 }
 
