@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getAllMenu, getCategory } from '../../api/menu';
+import { getAllCategories } from '../../api/category';
 import type { Food } from '../../types/food';
 
 interface MenuState {
@@ -7,6 +8,7 @@ interface MenuState {
   categories: string[];
   selectedCategory: string;
   isLoading: boolean;
+  isLoadingCategories: boolean;
   error: string | null;
 }
 
@@ -15,6 +17,7 @@ const initialState: MenuState = {
   categories: [],
   selectedCategory: 'all',
   isLoading: false,
+  isLoadingCategories: false,
   error: null,
 };
 
@@ -26,6 +29,11 @@ export const fetchAllMenu = createAsyncThunk('menu/fetchAll', async () => {
 export const fetchCategory = createAsyncThunk('menu/fetchCategory', async (category: string) => {
   const response = await getCategory(category);
   return response.foods || [];
+});
+
+export const fetchCategories = createAsyncThunk('menu/fetchCategories', async () => {
+  const categories = await getAllCategories();
+  return categories.map((cat: { _id: string; name: string }) => cat.name);
 });
 
 const menuSlice = createSlice({
@@ -48,9 +56,6 @@ const menuSlice = createSlice({
       .addCase(fetchAllMenu.fulfilled, (state, action) => {
         state.isLoading = false;
         state.foods = action.payload || [];
-        state.categories = action.payload && action.payload.length > 0
-          ? [...new Set((action.payload as Food[]).map((food) => food.category))]
-          : [];
       })
       .addCase(fetchAllMenu.rejected, (state, action) => {
         state.isLoading = false;
@@ -67,6 +72,18 @@ const menuSlice = createSlice({
       .addCase(fetchCategory.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || 'Ошибка загрузки категории';
+      })
+      .addCase(fetchCategories.pending, (state) => {
+        state.isLoadingCategories = true;
+        state.error = null;
+      })
+      .addCase(fetchCategories.fulfilled, (state, action) => {
+        state.isLoadingCategories = false;
+        state.categories = action.payload || [];
+      })
+      .addCase(fetchCategories.rejected, (state, action) => {
+        state.isLoadingCategories = false;
+        state.error = action.error.message || 'Ошибка загрузки категорий';
       });
   },
 });

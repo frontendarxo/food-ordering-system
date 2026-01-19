@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createCategory } from '../../../../api/category';
 import { useAppDispatch } from '../../../../store/hooks';
-import { fetchAllMenu } from '../../../../store/slices/menuSlice';
+import { fetchCategories } from '../../../../store/slices/menuSlice';
 import './style.css';
 
 interface CategoryModalProps {
@@ -35,7 +35,7 @@ export const CategoryModal = ({ isOpen, onClose }: CategoryModalProps) => {
 
     try {
       await createCategory(name.trim());
-      dispatch(fetchAllMenu());
+      dispatch(fetchCategories());
       onClose();
     } catch (err: unknown) {
       if (err instanceof Error) {

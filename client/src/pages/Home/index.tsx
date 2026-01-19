@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { fetchAllMenu, fetchCategory, setSelectedCategory } from '../../store/slices/menuSlice';
+import { fetchAllMenu, fetchCategory, fetchCategories, setSelectedCategory } from '../../store/slices/menuSlice';
 import { FoodList } from '../../features/api/menu/ui/FoodList';
 import { CategoryFilter } from '../../features/api/menu/ui/CategoryFilter';
 import { FoodModal } from '../../features/api/menu/ui/FoodModal';
 import { CategoryModal } from '../../features/api/menu/ui/CategoryModal';
+import { CategoryEditModal } from '../../features/api/menu/ui/CategoryEditModal';
 import { useAuth } from '../../contexts/useAuth';
 import './style.css';
 
@@ -14,10 +15,12 @@ export const Home = () => {
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isCategoryEditModalOpen, setIsCategoryEditModalOpen] = useState(false);
   const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     dispatch(fetchAllMenu());
+    dispatch(fetchCategories());
   }, [dispatch]);
 
   const handleCategoryChange = (category: string) => {
@@ -57,6 +60,14 @@ export const Home = () => {
             </button>
             <button
               className="home-add-button"
+              onClick={() => setIsCategoryEditModalOpen(true)}
+              aria-label="Изменить категории"
+            >
+              <span className="home-add-button-icon">✎</span>
+              <span className="home-add-button-text">Изменить категории</span>
+            </button>
+            <button
+              className="home-add-button"
               onClick={() => setIsModalOpen(true)}
               aria-label="Добавить новую карточку"
             >
@@ -72,6 +83,10 @@ export const Home = () => {
           <CategoryModal
             isOpen={isCategoryModalOpen}
             onClose={() => setIsCategoryModalOpen(false)}
+          />
+          <CategoryEditModal
+            isOpen={isCategoryEditModalOpen}
+            onClose={() => setIsCategoryEditModalOpen(false)}
           />
           <FoodModal
             isOpen={isModalOpen}
