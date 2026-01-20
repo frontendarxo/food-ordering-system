@@ -273,50 +273,6 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
     </div>
   );
 
-  const nameDisplay = isEditingName ? (
-    <div className="food-card-name-edit">
-      <input
-        type="text"
-        value={nameValue}
-        onChange={(e) => setNameValue(e.target.value)}
-        className="food-card-name-input"
-        autoFocus
-        disabled={isUpdatingName}
-      />
-      <div className="food-card-name-actions">
-        <button
-          className="food-card-name-save"
-          onClick={handleNameSave}
-          disabled={isUpdatingName}
-          aria-label="Сохранить"
-        >
-          ✓
-        </button>
-        <button
-          className="food-card-name-cancel"
-          onClick={handleNameCancel}
-          disabled={isUpdatingName}
-          aria-label="Отмена"
-        >
-          ✕
-        </button>
-      </div>
-    </div>
-  ) : (
-    <div className="food-card-name-wrapper">
-      <h3 className="food-card-name">{food.name}</h3>
-      {isAdmin && (
-        <button
-          className="food-card-edit-button"
-          onClick={handleNameEdit}
-          aria-label="Изменить название"
-        >
-          ✏️
-        </button>
-      )}
-    </div>
-  );
-
   const imageDisplay = isEditingImage ? (
     <div className="food-card-image-edit">
       <input
@@ -368,6 +324,63 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
         onLoad={handleImageLoad}
         onError={handleImageError}
       />
+      {!imageError && (
+        <div className="food-card-image-overlay">
+          {isEditingName ? (
+            <div className="food-card-image-title-edit">
+              <input
+                type="text"
+                value={nameValue}
+                onChange={(e) => setNameValue(e.target.value)}
+                className="food-card-image-title-input"
+                autoFocus
+                disabled={isUpdatingName}
+                onClick={(e) => e.stopPropagation()}
+              />
+              <div className="food-card-image-title-actions">
+                <button
+                  className="food-card-image-title-save"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNameSave();
+                  }}
+                  disabled={isUpdatingName}
+                  aria-label="Сохранить"
+                >
+                  ✓
+                </button>
+                <button
+                  className="food-card-image-title-cancel"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNameCancel();
+                  }}
+                  disabled={isUpdatingName}
+                  aria-label="Отмена"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <h3 className="food-card-image-title">{food.name}</h3>
+              {isAdmin && (
+                <button
+                  className="food-card-image-title-edit-button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNameEdit();
+                  }}
+                  aria-label="Изменить название"
+                >
+                  ✏️
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      )}
       {isAdmin && (
         <button
           className="food-card-image-edit-button"
@@ -395,7 +408,36 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
           </button>
         )}
         <div className="food-card-info">
-          {nameDisplay}
+          {isEditingName && !isEditingImage && (
+            <div className="food-card-name-edit-mobile">
+              <input
+                type="text"
+                value={nameValue}
+                onChange={(e) => setNameValue(e.target.value)}
+                className="food-card-name-input"
+                autoFocus
+                disabled={isUpdatingName}
+              />
+              <div className="food-card-name-actions">
+                <button
+                  className="food-card-name-save"
+                  onClick={handleNameSave}
+                  disabled={isUpdatingName}
+                  aria-label="Сохранить"
+                >
+                  ✓
+                </button>
+                <button
+                  className="food-card-name-cancel"
+                  onClick={handleNameCancel}
+                  disabled={isUpdatingName}
+                  aria-label="Отмена"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          )}
           {priceDisplay}
           {!isAdmin && !isWorker && !food.inStock && <p className="food-card-status">Нет в наличии</p>}
           {(isAdmin || isWorker) && (

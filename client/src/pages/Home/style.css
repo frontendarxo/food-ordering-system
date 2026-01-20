@@ -1,14 +1,14 @@
 .home {
   padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  /* max-width: 1200px;
+  margin: 0 auto; */
 }
 
 .home-controls {
   display: flex;
   gap: 1rem;
-  align-items: flex-start;
-  margin-bottom: 2rem;
+  justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
 }
 
@@ -85,4 +85,3 @@
     justify-content: center;
   }
 }
-
