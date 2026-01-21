@@ -408,36 +408,6 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
           </button>
         )}
         <div className="food-card-info">
-          {isEditingName && !isEditingImage && (
-            <div className="food-card-name-edit-mobile">
-              <input
-                type="text"
-                value={nameValue}
-                onChange={(e) => setNameValue(e.target.value)}
-                className="food-card-name-input"
-                autoFocus
-                disabled={isUpdatingName}
-              />
-              <div className="food-card-name-actions">
-                <button
-                  className="food-card-name-save"
-                  onClick={handleNameSave}
-                  disabled={isUpdatingName}
-                  aria-label="Сохранить"
-                >
-                  ✓
-                </button>
-                <button
-                  className="food-card-name-cancel"
-                  onClick={handleNameCancel}
-                  disabled={isUpdatingName}
-                  aria-label="Отмена"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-          )}
           {priceDisplay}
           {!isAdmin && !isWorker && !food.inStock && <p className="food-card-status">Нет в наличии</p>}
           {(isAdmin || isWorker) && (

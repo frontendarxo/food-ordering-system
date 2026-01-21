@@ -17,6 +17,7 @@
 
 .food-card {
   background: white;
+  aspect-ratio: 1 / 1.2;
   border-radius: 8px;
   overflow: hidden;
   display: flex;
@@ -160,25 +161,6 @@
 .food-card-image-title-cancel:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-.food-card-name-edit-mobile {
-  display: none;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  background: #f9f9f9;
-  border-radius: 4px;
-}
-
-.food-card-name-edit-mobile .food-card-name-input {
-  width: 100%;
-  font-size: 1rem;
-}
-
-.food-card-name-edit-mobile .food-card-name-actions {
-  display: flex;
-  gap: 0.5rem;
 }
 
 .food-card-image {
@@ -626,12 +608,7 @@
     text-align: center;
   }
 
-  .food-card-image-overlay {
-    padding: 1.5rem 0.75rem 0.75rem;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-  }
+
 
   .food-card-image-title {
     font-size: 12px;
@@ -655,10 +632,6 @@
   .food-card-image-title-cancel {
     padding: 0.35rem 0.6rem;
     font-size: 0.85rem;
-  }
-
-  .food-card-name-edit-mobile {
-    display: block;
   }
 
   .food-card-name {
@@ -914,6 +887,7 @@
   font-size: 1.1rem;
   font-weight: 700;
   color: #8A1538;
+  width: 10%;
 }
 
 .food-card-price-input:focus {

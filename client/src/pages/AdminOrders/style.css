@@ -202,11 +202,13 @@
 .admin-order-card-header {
   display: flex;
   justify-content: space-between;
+  flex-direction: column;
   align-items: flex-start;
   margin-bottom: 20px;
   padding-bottom: 20px;
   border-bottom: 2px solid #f0f0f0;
   gap: 20px;
+  position: relative;
 }
 
 .admin-order-card-main-info {
@@ -220,6 +222,12 @@
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.delete-order-button {
+  position: absolute;
+  right: 0;
+  z-index: 10;
 }
 
 .admin-order-card-checkbox {
@@ -496,7 +504,6 @@
   }
 
   .admin-order-card-header {
-    flex-direction: column;
     align-items: flex-start;
   }
 

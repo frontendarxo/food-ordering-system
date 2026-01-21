@@ -490,7 +490,6 @@ export const AdminOrders = () => {
       <div
         key={order._id}
         className={orderCardClassName}
-        onClick={cardClickHandler}
       >
         <div className="admin-order-card-header">
           <div className="admin-order-card-main-info">
@@ -498,6 +497,11 @@ export const AdminOrders = () => {
               {selectionCheckbox}
               <div className="admin-order-card-id">
                 {orderIdLabel}
+              </div>
+              <div className='delete-order-button'>
+                <button className="admin-orders-action-button danger" onClick={cardClickHandler} type="button">
+                  X
+                </button>
               </div>
             </div>
             <div className="admin-order-card-status">
