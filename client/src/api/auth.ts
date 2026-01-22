@@ -1,17 +1,14 @@
 import { BASE_URL } from './config';
 import { handleApiError } from './utils.js';
+import type { User } from '../constants/auth';
 
 export interface LoginResponse {
   success: boolean;
-  user: {
-    role: 'admin' | 'worker';
-  };
+  user: User;
 }
 
 export interface UserResponse {
-  user: {
-    role: 'admin' | 'worker';
-  };
+  user: User;
 }
 
 export const login = async (login: string, password: string): Promise<LoginResponse> => {

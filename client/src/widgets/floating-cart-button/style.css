@@ -1,0 +1,83 @@
+.floating-cart-button {
+  display: none;
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #8A1538 0%, #a01a45 100%);
+  border-radius: 50%;
+  box-shadow: 0 4px 20px rgba(138, 21, 56, 0.5);
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.floating-cart-button:active {
+  transform: scale(0.95);
+}
+
+.floating-cart-icon {
+  font-size: 1.8rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.floating-cart-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  box-shadow: 0 2px 8px rgba(255, 68, 68, 0.5);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Показываем только на мобильных устройствах */
+@media (max-width: 768px) {
+  .floating-cart-button {
+    display: flex;
+  }
+}
+
+@media (max-width: 480px) {
+  .floating-cart-button {
+    width: 56px;
+    height: 56px;
+    bottom: 1.5rem;
+    right: 1.5rem;
+  }
+  
+  .floating-cart-icon {
+    font-size: 1.6rem;
+  }
+  
+  .floating-cart-badge {
+    font-size: 0.7rem;
+    min-width: 22px;
+    height: 22px;
+  }
+}

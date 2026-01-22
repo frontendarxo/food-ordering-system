@@ -35,6 +35,7 @@ export const createFood = async (foodData: {
     category: string;
     image: File;
     inStock: boolean;
+    locations: ('шатой' | 'гикало')[];
 }): Promise<{ food: Food }> => {
     const formData = new FormData();
     formData.append('name', foodData.name);
@@ -42,6 +43,7 @@ export const createFood = async (foodData: {
     formData.append('category', foodData.category);
     formData.append('image', foodData.image);
     formData.append('inStock', foodData.inStock.toString());
+    formData.append('locations', JSON.stringify(foodData.locations));
 
     const response = await fetch(`${BASE_URL}/foods`, {
         method: 'POST',
@@ -73,14 +75,18 @@ export const updateFoodPrice = async (id: string, price: number): Promise<{ food
     return response.json();
 };
 
-export const updateFoodStock = async (id: string, inStock: boolean): Promise<{ food: Food }> => {
+export const updateFoodStock = async (
+    id: string, 
+    inStock: boolean, 
+    location?: 'шатой' | 'гикало'
+): Promise<{ food: Food }> => {
     const response = await fetch(`${BASE_URL}/foods/${id}/stock`, {
         method: 'PATCH',
         credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ inStock }),
+        body: JSON.stringify({ inStock, location }),
     });
     
     if (!response.ok) {

@@ -40,8 +40,17 @@ export const Home = () => {
     return <div className="home-error">Ошибка: {error}</div>;
   }
 
+  const isWorker = user?.role === 'worker';
+  const userLocation = user?.location;
+
   return (
     <div className="home">
+      {isWorker && userLocation && (
+        <div className="home-location-badge">
+          <span className="home-location-icon">📍</span>
+          <span className="home-location-text">Центр: {userLocation}</span>
+        </div>
+      )}
       <div className="home-controls">
         <CategoryFilter 
           categories={categories} 

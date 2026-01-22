@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { Food } from '../../../../types/food';
 import { useCartActions } from '../../cart/model';
 import { formatPrice } from '../../cart/lib';
 import { useAuth } from '../../../../contexts/useAuth';
+import { useLocation } from '../../../../contexts/useLocation';
 import { updateFoodPrice, deleteFood, updateFoodStock, updateFoodName, updateFoodImage } from '../../../../api/menu';
-import { useAppDispatch } from '../../../../store/hooks';
+import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { fetchAllMenu, fetchCategory } from '../../../../store/slices/menuSlice';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { QuantitySelector } from '../../cart/ui';
 import { getImageUrl } from '../../../../utils/imageUrl';
 import './style.css';
 
@@ -16,9 +18,10 @@ interface FoodCardProps {
 }
 
 export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
-  const { addItem } = useCartActions();
+  const { addItem, updateItem, removeItem } = useCartActions();
   const { user } = useAuth();
   const dispatch = useAppDispatch();
+  const cartItems = useAppSelector((state) => state.cart.items);
   const [showNotification, setShowNotification] = useState(false);
   const [isEditingPrice, setIsEditingPrice] = useState(false);
   const [priceValue, setPriceValue] = useState(food.price.toString());
@@ -34,9 +37,29 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
   const [isUpdatingImage, setIsUpdatingImage] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const [localStockByLocation, setLocalStockByLocation] = useState<Record<string, boolean>>({
+    'шатой': food.stockByLocation?.['шатой'] ?? true,
+    'гикало': food.stockByLocation?.['гикало'] ?? true
+  });
 
   const isAdmin = user?.role === 'admin';
   const isWorker = user?.role === 'worker';
+  const workerLocation = user?.location;
+  const { location: userLocation } = useLocation();
+
+  // Вычисляем актуальный статус наличия с учетом локации
+  const actualInStock = useMemo(() => {
+    // Для работника - статус его центра
+    if (isWorker && workerLocation) {
+      return food.stockByLocation?.[workerLocation] ?? food.inStock;
+    }
+    // Для обычного пользователя - статус его локации
+    if (!isAdmin && !isWorker && userLocation) {
+      return food.stockByLocation?.[userLocation] ?? food.inStock;
+    }
+    // Для админа - глобальный статус
+    return food.inStock;
+  }, [food.inStock, food.stockByLocation, isAdmin, isWorker, workerLocation, userLocation]);
 
   useEffect(() => {
     if (!isEditingName) {
@@ -55,12 +78,39 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
     setImageError(false);
   }, [food.image]);
 
+  useEffect(() => {
+    setLocalStockByLocation({
+      'шатой': food.stockByLocation?.['шатой'] ?? true,
+      'гикало': food.stockByLocation?.['гикало'] ?? true
+    });
+  }, [food.stockByLocation]);
+
+  const itemInCart = useMemo(() => {
+    return cartItems.find(item => item.food._id === food._id);
+  }, [cartItems, food._id]);
+
   const handleAddToCart = () => {
     addItem(food, 1);
     setShowNotification(true);
     setTimeout(() => {
       setShowNotification(false);
     }, 2000);
+  };
+
+  const handleIncreaseQuantity = () => {
+    if (itemInCart) {
+      updateItem(food._id, itemInCart.quantity + 1);
+    }
+  };
+
+  const handleDecreaseQuantity = () => {
+    if (itemInCart) {
+      if (itemInCart.quantity === 1) {
+        removeItem(food._id);
+      } else {
+        updateItem(food._id, itemInCart.quantity - 1);
+      }
+    }
   };
 
   const handlePriceEdit = () => {
@@ -118,16 +168,54 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
     setShowDeleteModal(false);
   };
 
-  const handleStockToggle = async () => {
+  const handleStockToggle = async (location?: 'шатой' | 'гикало') => {
     setIsUpdatingStock(true);
     try {
-      await updateFoodStock(food._id, !food.inStock);
+      // Для работника - инвертируем его локальный статус
+      const currentStatus = isWorker && workerLocation 
+        ? (food.stockByLocation?.[workerLocation] ?? food.inStock)
+        : food.inStock;
+      
+      await updateFoodStock(food._id, !currentStatus, location);
       if (selectedCategory === 'all') {
         dispatch(fetchAllMenu());
       } else {
         dispatch(fetchCategory(selectedCategory));
       }
     } catch {
+      setIsUpdatingStock(false);
+    }
+  };
+
+  const handleLocationToggle = async (location: 'шатой' | 'гикало') => {
+    if (isUpdatingStock) return; // Предотвращаем двойной клик
+    
+    setIsUpdatingStock(true);
+    try {
+      const currentStatus = localStockByLocation[location];
+      const newStatus = !currentStatus;
+      
+      // Оптимистичное обновление UI
+      setLocalStockByLocation(prev => ({
+        ...prev,
+        [location]: newStatus
+      }));
+      
+      await updateFoodStock(food._id, newStatus, location);
+      
+      if (selectedCategory === 'all') {
+        await dispatch(fetchAllMenu());
+      } else {
+        await dispatch(fetchCategory(selectedCategory));
+      }
+      
+      setIsUpdatingStock(false);
+    } catch {
+      // Откатываем оптимистичное обновление при ошибке
+      setLocalStockByLocation({
+        'шатой': food.stockByLocation?.['шатой'] ?? true,
+        'гикало': food.stockByLocation?.['гикало'] ?? true
+      });
       setIsUpdatingStock(false);
     }
   };
@@ -395,7 +483,7 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
 
   return (
     <>
-      <div className={`food-card ${!food.inStock ? 'food-card-out-of-stock' : ''}`}>
+      <div className={`food-card ${!actualInStock ? 'food-card-out-of-stock' : ''}`}>
         {imageDisplay}
         {isAdmin && !isEditingImage && (
           <button
@@ -409,32 +497,74 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
         )}
         <div className="food-card-info">
           {priceDisplay}
-          {!isAdmin && !isWorker && !food.inStock && <p className="food-card-status">Нет в наличии</p>}
-          {(isAdmin || isWorker) && (
+          {!isAdmin && !isWorker && !actualInStock && <p className="food-card-status">Нет в наличии</p>}
+          
+          {/* Работник: видит статус только своего центра */}
+          {isWorker && workerLocation && (
             <label
               className={`food-card-stock-toggle ${
-                food.inStock ? 'food-card-stock-toggle-active' : 'food-card-stock-toggle-inactive'
+                (food.stockByLocation?.[workerLocation] ?? food.inStock) 
+                  ? 'food-card-stock-toggle-active' 
+                  : 'food-card-stock-toggle-inactive'
               }`}
             >
               <input
                 type="checkbox"
-                checked={food.inStock}
-                onChange={handleStockToggle}
+                checked={food.stockByLocation?.[workerLocation] ?? food.inStock}
+                onChange={() => handleStockToggle(workerLocation)}
                 disabled={isUpdatingStock}
               />
               <span className="food-card-stock-label">
                 {isUpdatingStock
                   ? 'Обновление...'
-                  : food.inStock
+                  : (food.stockByLocation?.[workerLocation] ?? food.inStock)
                   ? 'В наличии'
                   : 'Нет в наличии'}
               </span>
             </label>
           )}
-          {!isAdmin && !isWorker && food.inStock && (
-            <button className="food-card-button" onClick={handleAddToCart}>
-              В корзину
-            </button>
+          
+          {/* Админ: видит статус по всем центрам */}
+          {isAdmin && (
+            <div className="food-card-stock-admin">
+              <div className="food-card-stock-locations">
+                <button
+                  className={`food-card-stock-location ${localStockByLocation['шатой'] ? 'in-stock' : 'out-stock'}`}
+                  onClick={() => handleLocationToggle('шатой')}
+                  disabled={isUpdatingStock}
+                  title="Нажмите для переключения наличия в Шатой"
+                >
+                  <span className="food-card-stock-location-icon">
+                    {localStockByLocation['шатой'] ? '✓' : '✗'}
+                  </span>
+                  <span className="food-card-stock-location-name">Шатой</span>
+                </button>
+                <button
+                  className={`food-card-stock-location ${localStockByLocation['гикало'] ? 'in-stock' : 'out-stock'}`}
+                  onClick={() => handleLocationToggle('гикало')}
+                  disabled={isUpdatingStock}
+                  title="Нажмите для переключения наличия в Гикало"
+                >
+                  <span className="food-card-stock-location-icon">
+                    {localStockByLocation['гикало'] ? '✓' : '✗'}
+                  </span>
+                  <span className="food-card-stock-location-name">Гикало</span>
+                </button>
+              </div>
+            </div>
+          )}
+          {!isAdmin && !isWorker && actualInStock && (
+            itemInCart ? (
+              <QuantitySelector
+                quantity={itemInCart.quantity}
+                onIncrease={handleIncreaseQuantity}
+                onDecrease={handleDecreaseQuantity}
+              />
+            ) : (
+              <button className="food-card-button" onClick={handleAddToCart}>
+                В корзину
+              </button>
+            )
           )}
         </div>
       </div>

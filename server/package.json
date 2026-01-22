@@ -7,9 +7,10 @@
     "build": "tsc -b",
     "start": "node dist/app.js",
     "dev": "tsx --tsconfig tsconfig.dev.json --watch src/app.ts",
+    "migrate:locations": "tsx src/migrations/addLocationFields.ts",
     "prelightdeploy": "npm run build && scp -rC dist/ salakh@5.35.8.56:/home/salakh/qatar-app-be",
-    "predeploy": "scp -rС .env.production salakh@5.35.8.56:/home/salakh/qatar-app-be/.env.production && scp -rС package.json salakh@5.35.8.56:/home/salakh/qatar-app-be/package.json && scp -rС package-lock.json salakh@5.35.8.56:/home/salakh/qatar-app-be/package-lock.json",
-    "deploy": "npm run build && scp -rC dist/* salakh@5.35.8.56:/home/salakh/qatar-app-be",
+    "prodeploy": "scp -rC .env.production salakh@5.35.8.56:/home/salakh/qatar-app-be/.env && scp -rC package.json salakh@5.35.8.56:/home/salakh/qatar-app-be/package.json",
+    "deploy": "npm run build && scp -rC dist/ salakh@5.35.8.56:/home/salakh/qatar-app-be",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -24,7 +25,8 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.0.1",
     "multer": "^1.4.5-lts.1",
-    "redis": "^5.10.0"
+    "redis": "^5.10.0",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

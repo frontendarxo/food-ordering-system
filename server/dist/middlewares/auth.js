@@ -17,8 +17,13 @@ export const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0
             throw new UnauthorizedError('Недействительный токен');
         }
         const decoded = jwt.verify(token, JWT_SECRET);
+        // Работники должны иметь локацию в токене
+        if (decoded.role === 'worker' && !decoded.location) {
+            throw new UnauthorizedError('Необходимо перелогиниться');
+        }
         res.locals.userId = decoded.userId;
         res.locals.userRole = decoded.role;
+        res.locals.userLocation = decoded.location;
         next();
     }
     catch (error) {

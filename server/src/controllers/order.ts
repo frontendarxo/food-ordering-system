@@ -105,7 +105,18 @@ export const getAllOrders = async (req: Request, res: Response, next: NextFuncti
     try {
         requireAdminOrWorker(res.locals.userRole);
         
-        const orders = await Order.find().populate('items.food').sort({ created_at: -1 });
+        const userRole = res.locals.userRole;
+        const userLocation = res.locals.userLocation;
+        
+        let query: any = {};
+        
+        // Работники видят только заказы своего центра
+        if (userRole === 'worker' && userLocation) {
+            query.location = userLocation;
+        }
+        // Админ видит все заказы (query остается пустым)
+        
+        const orders = await Order.find(query).populate('items.food').sort({ created_at: -1 });
         res.status(200).json({ orders });
     } catch (error) {
         next(error);

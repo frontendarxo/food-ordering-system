@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { UserRole } from '../constants/auth';
+import type { User } from '../constants/auth';
 import { AuthContext } from './authContext';
 import { login as loginApi, logout as logoutApi, getCurrentUser } from '../api/auth';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<{ role: UserRole } | null>(() => {
+  const [user, setUser] = useState<User | null>(() => {
     try {
       const saved = localStorage.getItem('auth_user');
       if (!saved) return null;

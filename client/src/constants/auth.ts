@@ -12,4 +12,10 @@ export const AUTH_CREDENTIALS = {
 };
 
 export type UserRole = 'admin' | 'worker';
+export type UserLocation = 'шатой' | 'гикало';
+
+export interface User {
+  role: UserRole;
+  location?: UserLocation;
+}
 

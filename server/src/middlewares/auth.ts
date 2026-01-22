@@ -11,9 +11,14 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
             throw new UnauthorizedError('Недействительный токен');
         }
 
-        const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; role: 'admin' | 'worker' };
+        const decoded = jwt.verify(token, JWT_SECRET) as { 
+            userId: string; 
+            role: 'admin' | 'worker';
+            location?: 'шатой' | 'гикало';
+        };
         res.locals.userId = decoded.userId;
         res.locals.userRole = decoded.role;
+        res.locals.userLocation = decoded.location;
         next();
     } catch (error) {
         next(new UnauthorizedError('Недействительный токен'));

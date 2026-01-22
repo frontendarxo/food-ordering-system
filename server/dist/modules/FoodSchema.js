@@ -19,6 +19,18 @@ export const foodSchema = new Schema({
     inStock: {
         type: Boolean,
         required: true
+    },
+    // В каких центрах доступно блюдо
+    locations: {
+        type: [String],
+        enum: ['шатой', 'гикало'],
+        default: ['шатой', 'гикало']
+    },
+    // Наличие по каждому центру
+    stockByLocation: {
+        type: Map,
+        of: Boolean,
+        default: () => new Map([['шатой', true], ['гикало', true]])
     }
 });
 const Food = model('Food', foodSchema);

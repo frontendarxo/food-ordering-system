@@ -18,7 +18,7 @@ export const FoodModal = ({ isOpen, onClose, selectedCategory }: FoodModalProps)
   const [category, setCategory] = useState(selectedCategory === 'all' ? '' : selectedCategory);
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [inStock, setInStock] = useState(true);
+  const [selectedLocations, setSelectedLocations] = useState<('шатой' | 'гикало')[]>(['шатой', 'гикало']);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -29,7 +29,7 @@ export const FoodModal = ({ isOpen, onClose, selectedCategory }: FoodModalProps)
       setCategory(selectedCategory === 'all' ? '' : selectedCategory);
       setImage(null);
       setImagePreview(null);
-      setInStock(true);
+      setSelectedLocations(['шатой', 'гикало']);
       setError('');
     }
   }, [isOpen, selectedCategory]);
@@ -75,6 +75,11 @@ export const FoodModal = ({ isOpen, onClose, selectedCategory }: FoodModalProps)
       return;
     }
 
+    if (selectedLocations.length === 0) {
+      setError('Выберите хотя бы один центр');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -83,7 +88,8 @@ export const FoodModal = ({ isOpen, onClose, selectedCategory }: FoodModalProps)
         price: parseFloat(price),
         category: category.trim(),
         image,
-        inStock,
+        inStock: true,
+        locations: selectedLocations,
       });
 
       dispatch(fetchAllMenu());
@@ -174,21 +180,50 @@ export const FoodModal = ({ isOpen, onClose, selectedCategory }: FoodModalProps)
             )}
           </div>
           <div className="food-modal-field">
-            <label
-              className={`food-modal-checkbox-label ${
-                inStock ? 'food-modal-checkbox-active' : 'food-modal-checkbox-inactive'
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={inStock}
-                onChange={(e) => setInStock(e.target.checked)}
-                disabled={isSubmitting}
-              />
-              <span className="food-modal-checkbox-text">
-                {inStock ? 'В наличии' : 'Нет в наличии'}
-              </span>
-            </label>
+            <label className="food-modal-label">Доступно в центрах *</label>
+            <div className="food-modal-locations">
+              <label
+                className={`food-modal-location-checkbox ${
+                  selectedLocations.includes('шатой') ? 'food-modal-location-active' : ''
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedLocations.includes('шатой')}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedLocations([...selectedLocations, 'шатой']);
+                    } else {
+                      setSelectedLocations(selectedLocations.filter(loc => loc !== 'шатой'));
+                    }
+                  }}
+                  disabled={isSubmitting}
+                />
+                <span>Шатой</span>
+              </label>
+              <label
+                className={`food-modal-location-checkbox ${
+                  selectedLocations.includes('гикало') ? 'food-modal-location-active' : ''
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedLocations.includes('гикало')}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedLocations([...selectedLocations, 'гикало']);
+                    } else {
+                      setSelectedLocations(selectedLocations.filter(loc => loc !== 'гикало'));
+                    }
+                  }}
+                  disabled={isSubmitting}
+                />
+                <span>Гикало</span>
+              </label>
+            </div>
+            <p className="food-modal-location-hint">
+              Блюдо будет создано в наличии для выбранных центров. Управление наличием - на карточке меню.
+            </p>
           </div>
           {error && <div className="food-modal-error">{error}</div>}
           <div className="food-modal-actions">

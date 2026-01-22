@@ -17,22 +17,30 @@ export const login = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
     const adminLogin = process.env.ADMIN_LOGIN;
     const adminPassword = process.env.ADMIN_PASSWORD;
-    const workerLogin = process.env.WORKER_LOGIN;
-    const workerPassword = process.env.WORKER_PASSWORD;
-    if (!adminLogin || !adminPassword || !workerLogin || !workerPassword) {
+    const workerShatoyLogin = process.env.WORKER_SHATOY_LOGIN;
+    const workerShatoyPassword = process.env.WORKER_SHATOY_PASSWORD;
+    const workerGikaloLogin = process.env.WORKER_GIKALO_LOGIN;
+    const workerGikaloPassword = process.env.WORKER_GIKALO_PASSWORD;
+    if (!adminLogin || !adminPassword || !workerShatoyLogin || !workerShatoyPassword || !workerGikaloLogin || !workerGikaloPassword) {
         throw new Error('Учетные данные не настроены в переменных окружения');
     }
     let role = null;
+    let location = undefined;
     if (username === adminLogin && password === adminPassword) {
         role = 'admin';
     }
-    else if (username === workerLogin && password === workerPassword) {
+    else if (username === workerShatoyLogin && password === workerShatoyPassword) {
         role = 'worker';
+        location = 'шатой';
+    }
+    else if (username === workerGikaloLogin && password === workerGikaloPassword) {
+        role = 'worker';
+        location = 'гикало';
     }
     else {
         throw new UnauthorizedError('Неверный логин или пароль');
     }
-    const token = jwt.sign({ userId: username, role }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: username, role, location }, JWT_SECRET, { expiresIn: '7d' });
     res.cookie('accessToken', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -41,7 +49,7 @@ export const login = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     });
     res.json({
         success: true,
-        user: { role },
+        user: { role, location },
     });
 });
 export const logout = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -51,8 +59,9 @@ export const logout = (_req, res) => __awaiter(void 0, void 0, void 0, function*
 export const me = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userRole = res.locals.userRole;
     const userId = res.locals.userId;
+    const userLocation = res.locals.userLocation;
     if (!userRole || !userId) {
         throw new UnauthorizedError('Пользователь не аутентифицирован');
     }
-    res.json({ user: { role: userRole } });
+    res.json({ user: { role: userRole, location: userLocation } });
 });

@@ -5,6 +5,14 @@ declare global {
     interface Request {
       file?: Multer.File;
     }
+    
+    namespace Locals {
+      interface Locals {
+        userId?: string;
+        userRole?: 'admin' | 'worker';
+        userLocation?: 'шатой' | 'гикало';
+      }
+    }
   }
 }
 

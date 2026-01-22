@@ -17,25 +17,32 @@ export const login = async (req: Request<{}, {}, LoginRequest>, res: Response) =
 
   const adminLogin = process.env.ADMIN_LOGIN;
   const adminPassword = process.env.ADMIN_PASSWORD;
-  const workerLogin = process.env.WORKER_LOGIN;
-  const workerPassword = process.env.WORKER_PASSWORD;
+  const workerShatoyLogin = process.env.WORKER_SHATOY_LOGIN;
+  const workerShatoyPassword = process.env.WORKER_SHATOY_PASSWORD;
+  const workerGikaloLogin = process.env.WORKER_GIKALO_LOGIN;
+  const workerGikaloPassword = process.env.WORKER_GIKALO_PASSWORD;
 
-  if (!adminLogin || !adminPassword || !workerLogin || !workerPassword) {
+  if (!adminLogin || !adminPassword || !workerShatoyLogin || !workerShatoyPassword || !workerGikaloLogin || !workerGikaloPassword) {
     throw new Error('Учетные данные не настроены в переменных окружения');
   }
 
   let role: 'admin' | 'worker' | null = null;
+  let location: 'шатой' | 'гикало' | undefined = undefined;
 
   if (username === adminLogin && password === adminPassword) {
     role = 'admin';
-  } else if (username === workerLogin && password === workerPassword) {
+  } else if (username === workerShatoyLogin && password === workerShatoyPassword) {
     role = 'worker';
+    location = 'шатой';
+  } else if (username === workerGikaloLogin && password === workerGikaloPassword) {
+    role = 'worker';
+    location = 'гикало';
   } else {
     throw new UnauthorizedError('Неверный логин или пароль');
   }
 
   const token = jwt.sign(
-    { userId: username, role },
+    { userId: username, role, location },
     JWT_SECRET,
     { expiresIn: '7d' }
   );
@@ -49,7 +56,7 @@ export const login = async (req: Request<{}, {}, LoginRequest>, res: Response) =
 
   res.json({
     success: true,
-    user: { role },
+    user: { role, location },
   });
 };
 
@@ -61,11 +68,12 @@ export const logout = async (_req: Request, res: Response) => {
 export const me = async (req: Request, res: Response) => {
   const userRole = res.locals.userRole;
   const userId = res.locals.userId;
+  const userLocation = res.locals.userLocation;
   
   if (!userRole || !userId) {
     throw new UnauthorizedError('Пользователь не аутентифицирован');
   }
 
-  res.json({ user: { role: userRole } });
+  res.json({ user: { role: userRole, location: userLocation } });
 };
 

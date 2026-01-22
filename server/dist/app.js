@@ -25,10 +25,10 @@ import router from './routers/index.js';
 import './utils/redis.js';
 const app = express();
 const corsOptions = {
-    origin: process.env.FRONTEND_URL,
+    origin: process.env.FRONTEND_URL, // http://localhost:5173 - for development, process.env.FRONTEND_URL - for production
     credentials: true,
     optionsSuccessStatus: 200,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
 };
 app.disable('x-powered-by');
 app.use((req, res, next) => {

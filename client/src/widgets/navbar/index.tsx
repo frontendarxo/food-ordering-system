@@ -1,11 +1,17 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/useAuth';
+import { useAppSelector } from '../../store/hooks';
 import './style.css';
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isAuthenticated, user, logout } = useAuth();
+  const cartItems = useAppSelector((state) => state.cart.items);
+
+  const totalItemsCount = useMemo(() => {
+    return cartItems.length;
+  }, [cartItems]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -37,9 +43,12 @@ export const Navbar = () => {
             </Link>
           </li>
           {user?.role !== 'admin' && user?.role !== 'worker' && (
-            <li>
-              <Link to="/cart" onClick={closeMenu}>
+            <li className="navbar-cart-item">
+              <Link to="/cart" onClick={closeMenu} className="navbar-cart-link">
                 Корзина
+                {totalItemsCount > 0 && (
+                  <span className="navbar-cart-badge">{totalItemsCount}</span>
+                )}
               </Link>
             </li>
           )}

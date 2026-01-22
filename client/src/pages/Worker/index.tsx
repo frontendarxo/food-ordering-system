@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { getAllOrders, updateOrderStatus } from '../../api/order';
 import { OrderCard } from '../../features/api/order/ui/OrderCard';
+import { useAuth } from '../../contexts/useAuth';
 import type { Order } from '../../types/order';
 import './style.css';
 
@@ -13,8 +14,10 @@ const ORDER_STATUSES = [
 const HOURS_24_MS = 24 * 60 * 60 * 1000;
 
 export const Worker = () => {
+  const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const workerLocation = user?.location;
 
   useEffect(() => {
     loadData();
@@ -57,6 +60,12 @@ export const Worker = () => {
 
   return (
     <div className="worker-page">
+      {workerLocation && (
+        <div className="worker-location-badge">
+          <span className="worker-location-icon">📍</span>
+          <span className="worker-location-text">Центр: {workerLocation}</span>
+        </div>
+      )}
       {recentOrders.length > 0 && (
         <div className="worker-header">
           <h1>Заказы</h1>
