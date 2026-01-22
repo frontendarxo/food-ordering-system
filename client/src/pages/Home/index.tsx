@@ -16,6 +16,7 @@ export const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isCategoryEditModalOpen, setIsCategoryEditModalOpen] = useState(false);
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [isHorizontal, setIsHorizontal] = useState<boolean>(() => {
     const saved = localStorage.getItem('foodListHorizontal');
     return saved === 'true';
@@ -37,6 +38,32 @@ export const Home = () => {
     dispatch(setSelectedCategory(category));
   };
 
+  const handleCategoryDropdownToggle = () => {
+    setIsCategoryDropdownOpen(!isCategoryDropdownOpen);
+  };
+
+  const handleCategoryAction = (action: () => void) => {
+    action();
+    setIsCategoryDropdownOpen(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.home-category-dropdown')) {
+        setIsCategoryDropdownOpen(false);
+      }
+    };
+
+    if (isCategoryDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isCategoryDropdownOpen]);
+
   if (isLoading) {
     return <div className="home-loading">Загрузка меню...</div>;
   }
@@ -57,31 +84,77 @@ export const Home = () => {
         </div>
       )}
       <div className="home-controls">
-        <CategoryFilter 
-          categories={categories} 
-          selectedCategory={selectedCategory}
-          onCategoryChange={handleCategoryChange} 
-        />
         {isAdmin && (
-          <div className="home-admin-buttons">
+          <div className="home-admin-buttons-group">
+            <div className="home-category-dropdown">
+              <button
+                className="home-category-dropdown-toggle"
+                onClick={handleCategoryDropdownToggle}
+                aria-label="Управление категориями"
+                aria-expanded={isCategoryDropdownOpen}
+              >
+                <svg
+                  className="home-category-dropdown-icon"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M3 5C3 3.89543 3.89543 3 5 3H15C16.1046 3 17 3.89543 17 5V15C17 16.1046 16.1046 17 15 17H5C3.89543 17 3 16.1046 3 15V5Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    fill="none"
+                  />
+                  <path
+                    d="M7 7H13M7 10H13M7 13H11"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <span className="home-category-dropdown-text">Категории</span>
+                <svg
+                  className={`home-category-dropdown-arrow ${isCategoryDropdownOpen ? 'open' : ''}`}
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M4 6L8 10L12 6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+              {isCategoryDropdownOpen && (
+                <div className="home-category-dropdown-menu">
+                  <button
+                    className="home-category-dropdown-item"
+                    onClick={() => handleCategoryAction(() => setIsCategoryModalOpen(true))}
+                    aria-label="Создать категорию"
+                  >
+                    <span className="home-category-dropdown-item-icon">+</span>
+                    <span className="home-category-dropdown-item-text">Создать категорию</span>
+                  </button>
+                  <button
+                    className="home-category-dropdown-item"
+                    onClick={() => handleCategoryAction(() => setIsCategoryEditModalOpen(true))}
+                    aria-label="Изменить категории"
+                  >
+                    <span className="home-category-dropdown-item-icon">✎</span>
+                    <span className="home-category-dropdown-item-text">Изменить категории</span>
+                  </button>
+                </div>
+              )}
+            </div>
             <button
-              className="home-add-button"
-              onClick={() => setIsCategoryModalOpen(true)}
-              aria-label="Создать категорию"
-            >
-              <span className="home-add-button-icon">+</span>
-              <span className="home-add-button-text">Создать категорию</span>
-            </button>
-            <button
-              className="home-add-button"
-              onClick={() => setIsCategoryEditModalOpen(true)}
-              aria-label="Изменить категории"
-            >
-              <span className="home-add-button-icon">✎</span>
-              <span className="home-add-button-text">Изменить категории</span>
-            </button>
-            <button
-              className="home-add-button"
+              className="home-add-button home-add-food-button"
               onClick={() => setIsModalOpen(true)}
               aria-label="Добавить новую карточку"
             >
@@ -90,20 +163,45 @@ export const Home = () => {
             </button>
           </div>
         )}
-      </div>
-      <div className="home-view-controls">
-        <button
-          className={`home-view-button ${isHorizontal ? 'active' : ''}`}
-          onClick={handleViewModeToggle}
-          aria-label="Переключить вид отображения"
-        >
-          <span className="home-view-button-icon">
-            {isHorizontal ? '▤' : '▦'}
-          </span>
-          <span className="home-view-button-text">
-            {isHorizontal ? 'Горизонтально' : 'Вертикально'}
-          </span>
-        </button>
+        <div className="home-controls-top">
+          <CategoryFilter 
+            categories={categories} 
+            selectedCategory={selectedCategory}
+            onCategoryChange={handleCategoryChange} 
+          />
+          <button
+            className={`home-view-button ${isHorizontal ? 'active' : ''}`}
+            onClick={handleViewModeToggle}
+            aria-label={isHorizontal ? 'Переключить на вертикальный вид' : 'Переключить на горизонтальный вид'}
+          >
+            {isHorizontal ? (
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect x="2" y="2" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                <rect x="11" y="2" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                <rect x="2" y="11" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                <rect x="11" y="11" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+              </svg>
+            ) : (
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect x="2" y="2" width="16" height="5" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                <rect x="2" y="9" width="16" height="5" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                <rect x="2" y="16" width="16" height="2" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
       <FoodList foods={foods} selectedCategory={selectedCategory} isHorizontal={isHorizontal} />
       {isAdmin && (

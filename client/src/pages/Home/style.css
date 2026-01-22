@@ -29,19 +29,141 @@
 
 .home-controls {
   display: flex;
-  gap: 1rem;
-  justify-content: center;
+  flex-direction: column;
+  gap: 1.5rem;
   align-items: center;
-  flex-wrap: wrap;
+  margin-bottom: 1rem;
 }
 
-.home-admin-buttons {
+.home-controls-top {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  position: relative;
+}
+
+.home-admin-buttons-group {
   display: flex;
   gap: 1rem;
   align-items: center;
   flex-wrap: wrap;
-  margin-bottom: 2rem;
+  justify-content: center;
 }
+
+.home-category-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.home-category-dropdown-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #ffd700;
+  color: #8A1538;
+  border: 2px solid #ffd700;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  font-family: 'Montserrat', sans-serif;
+  white-space: nowrap;
+}
+
+.home-category-dropdown-toggle:hover {
+  background-color: #ffed4e;
+  border-color: #ffed4e;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.5);
+}
+
+.home-category-dropdown-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.5);
+}
+
+.home-category-dropdown-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.home-category-dropdown-text {
+  font-weight: 700;
+}
+
+.home-category-dropdown-arrow {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.home-category-dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+.home-category-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  background-color: white;
+  border: 2px solid #ffd700;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.home-category-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: white;
+  color: #8A1538;
+  border: none;
+  border-bottom: 1px solid rgba(138, 21, 56, 0.1);
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+  font-family: 'Montserrat', sans-serif;
+  text-align: left;
+}
+
+.home-category-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.home-category-dropdown-item:hover {
+  background-color: #ffd700;
+  color: #8A1538;
+}
+
+.home-category-dropdown-item:focus {
+  outline: none;
+  background-color: #ffed4e;
+}
+
+.home-category-dropdown-item-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+  font-weight: 300;
+  width: 20px;
+  text-align: center;
+}
+
+.home-category-dropdown-item-text {
+  font-weight: 600;
+}
+
 
 .home-loading,
 .home-error {
@@ -94,28 +216,21 @@
   font-weight: 700;
 }
 
-.home-view-controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 1.5rem 0;
-  width: 100%;
-}
-
 .home-view-button {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1.5rem;
+  justify-content: center;
+  padding: 0.75rem;
   background-color: rgba(255, 255, 255, 0.1);
   color: white;
   border: 2px solid rgba(255, 255, 255, 0.5);
   border-radius: 8px;
   cursor: pointer;
-  font-size: 1rem;
-  font-weight: 600;
   transition: all 0.3s ease;
   font-family: 'Montserrat', sans-serif;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
 }
 
 .home-view-button:hover {
@@ -143,33 +258,50 @@
   box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.5);
 }
 
-.home-view-button-icon {
-  font-size: 1.5rem;
-  line-height: 1;
-}
-
-.home-view-button-text {
-  font-weight: 700;
-  font-size: 1rem;
+.home-view-button svg {
+  width: 20px;
+  height: 20px;
 }
 
 @media (max-width: 767px) {
-  .home-controls {
-    flex-direction: column;
+  .home-controls-top {
+    width: 100%;
   }
 
-  .home-admin-buttons {
+  .home-controls-top .category-filter {
     width: 100%;
-    flex-direction: column;
+  }
+
+  .home-controls-top .home-view-button {
+    max-width: 100%;
+  }
+
+  .home-admin-buttons-group {
+    width: auto;
+    flex-direction: row;
+  }
+
+  .home-category-dropdown {
+    width: auto;
+  }
+
+  .home-category-dropdown-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .home-category-dropdown-menu {
+    left: 0;
+    right: 0;
+    width: 100%;
   }
 
   .home-add-button {
-    width: 100%;
+    width: auto;
     justify-content: center;
   }
 
-  .home-view-button {
+  .home-add-food-button {
     width: 100%;
-    justify-content: center;
   }
 }

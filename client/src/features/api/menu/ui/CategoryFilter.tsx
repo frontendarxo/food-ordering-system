@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import './style.css';
 
 interface CategoryFilterProps {
@@ -9,44 +9,78 @@ interface CategoryFilterProps {
 
 export const CategoryFilter = ({ categories, selectedCategory, onCategoryChange }: CategoryFilterProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
+  const getSelectedCategoryLabel = () => {
+    if (selectedCategory === 'all') return 'Все категории';
+    return selectedCategory;
+  };
 
   const handleCategoryClick = (category: string) => {
     onCategoryChange(category);
     setIsOpen(false);
   };
 
-  const togglePanel = () => {
-    setIsOpen(!isOpen);
-  };
-
-  const getSelectedCategoryLabel = () => {
-    if (selectedCategory === 'all') return 'Все';
-    return selectedCategory;
-  };
-
   return (
-    <div className="category-filter">
-      <button className="category-filter-toggle" onClick={togglePanel}>
-        <span>Категории: {getSelectedCategoryLabel()}</span>
-        <span className={`category-filter-arrow ${isOpen ? 'open' : ''}`}>▼</span>
-      </button>
-      <div className={`category-filter-panel ${isOpen ? 'open' : ''}`}>
-        <button
-          className={`category-button ${selectedCategory === 'all' ? 'active' : ''}`}
-          onClick={() => handleCategoryClick('all')}
+    <div className="category-filter" ref={dropdownRef}>
+      <button
+        className="category-filter-button"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-label="Выбрать категорию"
+      >
+        <span className="category-filter-label">{getSelectedCategoryLabel()}</span>
+        <svg
+          className={`category-filter-arrow ${isOpen ? 'open' : ''}`}
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          Все
-        </button>
-        {categories.map((category) => (
+          <path
+            d="M4 6L8 10L12 6"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      {isOpen && (
+        <div className="category-filter-dropdown">
           <button
-            key={category}
-            className={`category-button ${selectedCategory === category ? 'active' : ''}`}
-            onClick={() => handleCategoryClick(category)}
+            className={`category-filter-item ${selectedCategory === 'all' ? 'active' : ''}`}
+            onClick={() => handleCategoryClick('all')}
           >
-            {category}
+            Все
           </button>
-        ))}
-      </div>
+          {categories.map((category) => (
+            <button
+              key={category}
+              className={`category-filter-item ${selectedCategory === category ? 'active' : ''}`}
+              onClick={() => handleCategoryClick(category)}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
