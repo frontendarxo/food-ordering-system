@@ -16,7 +16,17 @@ export const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isCategoryEditModalOpen, setIsCategoryEditModalOpen] = useState(false);
+  const [isHorizontal, setIsHorizontal] = useState<boolean>(() => {
+    const saved = localStorage.getItem('foodListHorizontal');
+    return saved === 'true';
+  });
   const isAdmin = user?.role === 'admin';
+
+  const handleViewModeToggle = () => {
+    const newMode = !isHorizontal;
+    setIsHorizontal(newMode);
+    localStorage.setItem('foodListHorizontal', String(newMode));
+  };
 
   useEffect(() => {
     dispatch(fetchAllMenu());
@@ -86,7 +96,21 @@ export const Home = () => {
           </div>
         )}
       </div>
-      <FoodList foods={foods} selectedCategory={selectedCategory} />
+      <div className="home-view-controls">
+        <button
+          className={`home-view-button ${isHorizontal ? 'active' : ''}`}
+          onClick={handleViewModeToggle}
+          aria-label="Переключить вид отображения"
+        >
+          <span className="home-view-button-icon">
+            {isHorizontal ? '▤' : '▦'}
+          </span>
+          <span className="home-view-button-text">
+            {isHorizontal ? 'Горизонтально' : 'Вертикально'}
+          </span>
+        </button>
+      </div>
+      <FoodList foods={foods} selectedCategory={selectedCategory} isHorizontal={isHorizontal} />
       {isAdmin && (
         <>
           <CategoryModal

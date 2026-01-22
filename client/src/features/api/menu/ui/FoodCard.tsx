@@ -496,6 +496,7 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
           </button>
         )}
         <div className="food-card-info">
+          <h3 className="food-card-name-inline">{food.name}</h3>
           {priceDisplay}
           {!isAdmin && !isWorker && !actualInStock && <p className="food-card-status">Нет в наличии</p>}
           

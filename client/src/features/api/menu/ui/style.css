@@ -1,7 +1,53 @@
+.food-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2rem, 5vw, 3rem);
+  width: 100%;
+}
+
+.food-category-section {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 3vw, 1.5rem);
+  width: 100%;
+}
+
+.food-category-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  padding: clamp(0.75rem, 2vw, 1rem) 0;
+  border-bottom: 3px solid #ffd700;
+  text-align: left;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+}
+
 .food-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+  gap: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.food-list-horizontal {
+  grid-template-columns: 1fr;
+  max-width: clamp(400px, 80vw, 600px);
+  margin: 0;
+  width: 100%;
+}
+
+.food-list-vertical {
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 100%;
+  margin: 0;
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  .food-list-vertical {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
 }
 
 .food-list-empty {
@@ -17,12 +63,76 @@
 
 .food-card {
   background: white;
-  aspect-ratio: 1 / 1.2;
+  aspect-ratio: 3 / 4;
   border-radius: 8px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   transition: transform 0.2s, box-shadow 0.2s;
+  min-height: 0;
+}
+
+/* Горизонтальные карточки */
+.food-list-horizontal .food-card {
+  flex-direction: row;
+  aspect-ratio: auto;
+  min-height: 150px;
+  max-height: 200px;
+}
+
+.food-list-horizontal .food-card-image-wrapper {
+  width: 40%;
+  height: 100%;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.food-list-horizontal .food-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.food-list-horizontal .food-card-image-overlay {
+  display: none;
+}
+
+.food-list-horizontal .food-card-info {
+  width: 60%;
+  padding: clamp(0.6rem, 1.8vw, 0.8rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.food-list-horizontal .food-card-name-inline {
+  display: block;
+  margin: 0 0 clamp(0.4rem, 1vw, 0.6rem) 0;
+  font-size: clamp(0.9rem, 2.3vw, 1.1rem);
+  font-weight: 600;
+  color: #333;
+  line-height: 1.3;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.food-list-horizontal .food-card-button {
+  margin-top: auto;
+  margin-bottom: clamp(0.3rem, 1vw, 0.5rem);
+  width: 100%;
+}
+
+/* Вертикальные карточки */
+.food-list-vertical .food-card {
+  aspect-ratio: 3 / 4;
+  flex-direction: column;
+}
+
+.food-list-vertical .food-card-name-inline {
+  display: none;
 }
 
 .food-card:hover {
@@ -662,8 +772,21 @@
 }
 
 @media (max-width: 768px) {
-  .food-list {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  .food-list-vertical {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .food-list-horizontal {
+    grid-template-columns: 1fr;
+  }
+
+  .food-category-title {
+    font-size: clamp(1.25rem, 5vw, 1.75rem);
+    padding: clamp(0.5rem, 2vw, 0.75rem) 0;
+  }
+
+  .food-list-container {
+    gap: clamp(1.5rem, 4vw, 2.5rem);
   }
 
   /* Убираем мешающие hover эффекты на мобильных */
@@ -679,22 +802,26 @@
     font-size: 0.95rem;
     animation: slideInTop 0.3s ease, fadeOutTop 0.3s ease 1.7s forwards;
   }
-
-
 }
 
 @media (max-width: 600px) {
-  .food-list {
-    grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+
+  /* Горизонтальные карточки - по 1 в ряд на мобильных */
+  .food-list-horizontal {
+    grid-template-columns: 1fr;
   }
 
-  .food-card-info {
+  .food-category-title {
+    font-size: clamp(1.1rem, 4.5vw, 1.5rem);
+  }
+
+  /* Стили только для вертикальных карточек на мобильных */
+  .food-list-vertical .food-card-info {
     padding: 0.5rem;
   }
 
   .food-card-image-error-text {
-    font-size: 11px;
-    line-height: 14px;
+    font-size: clamp(0.8rem, 2.5vw, 0.9rem);
     text-align: center;
   }
 

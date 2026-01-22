@@ -8,9 +8,14 @@ import './style.css';
 interface FoodListProps {
   foods: Food[];
   selectedCategory: string;
+  isHorizontal?: boolean;
 }
 
-export const FoodList = ({ foods, selectedCategory }: FoodListProps) => {
+interface GroupedFoods {
+  [category: string]: Food[];
+}
+
+export const FoodList = ({ foods, selectedCategory, isHorizontal = false }: FoodListProps) => {
   const { user } = useAuth();
   const { location: userLocation } = useLocation();
   const isAdmin = user?.role === 'admin';
@@ -36,6 +41,27 @@ export const FoodList = ({ foods, selectedCategory }: FoodListProps) => {
     return foods;
   }, [foods, userLocation, isAdmin, isWorker]);
 
+  // Группируем блюда по категориям
+  const groupedFoods = useMemo(() => {
+    const grouped: GroupedFoods = {};
+    
+    filteredFoods.forEach(food => {
+      const category = food.category || 'Без категории';
+      if (!grouped[category]) {
+        grouped[category] = [];
+      }
+      grouped[category].push(food);
+    });
+
+    // Сортируем категории по алфавиту
+    return Object.keys(grouped)
+      .sort()
+      .reduce((acc, key) => {
+        acc[key] = grouped[key];
+        return acc;
+      }, {} as GroupedFoods);
+  }, [filteredFoods]);
+
   if (filteredFoods.length === 0 || !filteredFoods || filteredFoods.length === undefined) {
     return (
       <div className="food-list-empty">
@@ -54,14 +80,23 @@ export const FoodList = ({ foods, selectedCategory }: FoodListProps) => {
     );
   }
 
+  const listClassName = isHorizontal ? 'food-list-horizontal' : 'food-list-vertical';
+
   return (
-    <div className="food-list">
-      {filteredFoods.map((food) => (
-        <FoodCard
-          key={food._id}
-          food={food}
-          selectedCategory={selectedCategory}
-        />
+    <div className="food-list-container">
+      {Object.entries(groupedFoods).map(([category, categoryFoods]) => (
+        <div key={category} className="food-category-section">
+          <h2 className="food-category-title">{category}</h2>
+          <div className={`food-list ${listClassName}`}>
+            {categoryFoods.map((food) => (
+              <FoodCard
+                key={food._id}
+                food={food}
+                selectedCategory={selectedCategory}
+              />
+            ))}
+          </div>
+        </div>
       ))}
     </div>
   );
