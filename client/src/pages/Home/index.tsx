@@ -78,7 +78,7 @@ export const Home = () => {
   const userLocation = user?.location;
 
   return (
-    <div className="home">
+    <div className={`home ${isHorizontal ? 'home-horizontal' : ''}`}>
       {isWorker && userLocation && (
         <div className="home-location-badge">
           <span className="home-location-icon">📍</span>
