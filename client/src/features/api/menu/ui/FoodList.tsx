@@ -21,25 +21,27 @@ export const FoodList = ({ foods, selectedCategory, isHorizontal = false }: Food
   const isAdmin = user?.role === 'admin';
   const isWorker = user?.role === 'worker';
 
-  // Фильтруем блюда для обычных пользователей по локации
+  // Фильтруем блюда по локации и категории
   const filteredFoods = useMemo(() => {
-    // Админ и работник видят все (их фильтрует сервер)
-    if (isAdmin || isWorker) {
-      return foods;
+    let result = foods;
+
+    // Фильтрация по категории
+    if (selectedCategory !== 'all') {
+      result = result.filter(food => food.category === selectedCategory);
     }
 
-    // Обычный пользователь видит все блюда доступные в его локации
-    // (включая те которые нет в наличии - они будут затемнены через FoodCard)
-    if (userLocation) {
-      return foods.filter(food => {
-        const isInLocation = food.locations?.includes(userLocation);
-        return isInLocation; // Показываем все блюда локации
-      });
+    // Фильтрация по локации для обычных пользователей
+    if (!isAdmin && !isWorker) {
+      if (userLocation) {
+        result = result.filter(food => {
+          const isInLocation = food.locations?.includes(userLocation);
+          return isInLocation;
+        });
+      }
     }
 
-    // Если локация не выбрана, показываем все блюда
-    return foods;
-  }, [foods, userLocation, isAdmin, isWorker]);
+    return result;
+  }, [foods, selectedCategory, userLocation, isAdmin, isWorker]);
 
   // Группируем блюда по категориям
   const groupedFoods = useMemo(() => {
@@ -92,7 +94,6 @@ export const FoodList = ({ foods, selectedCategory, isHorizontal = false }: Food
               <FoodCard
                 key={food._id}
                 food={food}
-                selectedCategory={selectedCategory}
               />
             ))}
           </div>

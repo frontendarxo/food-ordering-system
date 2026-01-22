@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { fetchAllMenu, fetchCategory, fetchCategories, setSelectedCategory } from '../../store/slices/menuSlice';
+import { fetchAllMenu, fetchCategories, setSelectedCategory } from '../../store/slices/menuSlice';
 import { FoodList } from '../../features/api/menu/ui/FoodList';
 import { CategoryFilter } from '../../features/api/menu/ui/CategoryFilter';
 import { FoodModal } from '../../features/api/menu/ui/FoodModal';
@@ -35,11 +35,6 @@ export const Home = () => {
 
   const handleCategoryChange = (category: string) => {
     dispatch(setSelectedCategory(category));
-    if (category === 'all') {
-      dispatch(fetchAllMenu());
-    } else {
-      dispatch(fetchCategory(category));
-    }
   };
 
   if (isLoading) {

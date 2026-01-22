@@ -6,7 +6,7 @@ import { useAuth } from '../../../../contexts/useAuth';
 import { useLocation } from '../../../../contexts/useLocation';
 import { updateFoodPrice, deleteFood, updateFoodStock, updateFoodName, updateFoodImage } from '../../../../api/menu';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
-import { fetchAllMenu, fetchCategory } from '../../../../store/slices/menuSlice';
+import { fetchAllMenu } from '../../../../store/slices/menuSlice';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { QuantitySelector } from '../../cart/ui';
 import { getImageUrl } from '../../../../utils/imageUrl';
@@ -14,10 +14,9 @@ import './style.css';
 
 interface FoodCardProps {
   food: Food;
-  selectedCategory: string;
 }
 
-export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
+export const FoodCard = ({ food }: FoodCardProps) => {
   const { addItem, updateItem, removeItem } = useCartActions();
   const { user } = useAuth();
   const dispatch = useAppDispatch();
@@ -129,11 +128,7 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
     try {
       await updateFoodPrice(food._id, newPrice);
       setIsEditingPrice(false);
-      if (selectedCategory === 'all') {
-        dispatch(fetchAllMenu());
-      } else {
-        dispatch(fetchCategory(selectedCategory));
-      }
+      dispatch(fetchAllMenu());
     } catch {
       setPriceValue(food.price.toString());
       setIsEditingPrice(false);
@@ -154,11 +149,7 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
     try {
       await deleteFood(food._id);
       setShowDeleteModal(false);
-      if (selectedCategory === 'all') {
-        dispatch(fetchAllMenu());
-      } else {
-        dispatch(fetchCategory(selectedCategory));
-      }
+      dispatch(fetchAllMenu());
     } catch {
       setIsDeleting(false);
     }
@@ -177,11 +168,7 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
         : food.inStock;
       
       await updateFoodStock(food._id, !currentStatus, location);
-      if (selectedCategory === 'all') {
-        dispatch(fetchAllMenu());
-      } else {
-        dispatch(fetchCategory(selectedCategory));
-      }
+      dispatch(fetchAllMenu());
     } catch {
       setIsUpdatingStock(false);
     }
@@ -202,13 +189,7 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
       }));
       
       await updateFoodStock(food._id, newStatus, location);
-      
-      if (selectedCategory === 'all') {
-        await dispatch(fetchAllMenu());
-      } else {
-        await dispatch(fetchCategory(selectedCategory));
-      }
-      
+      await dispatch(fetchAllMenu());
       setIsUpdatingStock(false);
     } catch {
       // Откатываем оптимистичное обновление при ошибке
@@ -237,11 +218,7 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
     try {
       await updateFoodName(food._id, trimmedName);
       setIsEditingName(false);
-      if (selectedCategory === 'all') {
-        dispatch(fetchAllMenu());
-      } else {
-        dispatch(fetchCategory(selectedCategory));
-      }
+      dispatch(fetchAllMenu());
     } catch {
       setNameValue(food.name);
       setIsEditingName(false);
@@ -288,11 +265,7 @@ export const FoodCard = ({ food, selectedCategory }: FoodCardProps) => {
       setIsEditingImage(false);
       setImageFile(null);
       setImagePreview(null);
-      if (selectedCategory === 'all') {
-        dispatch(fetchAllMenu());
-      } else {
-        dispatch(fetchCategory(selectedCategory));
-      }
+      dispatch(fetchAllMenu());
     } catch {
       setIsEditingImage(false);
       setImageFile(null);
