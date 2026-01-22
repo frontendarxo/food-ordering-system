@@ -84,8 +84,26 @@ export const deleteCategory = async (id: string) => {
         if (!response.ok) {
             await handleApiError(response, 'Ошибка удаления категории');
         }
+        if (response.status === 204) {
+            return { message: 'Категория удалена успешно' };
+        }
         return response.json();
     } catch (error) {
         console.error(error);
+        throw error;
+    }
+}
+
+export const deleteCategoryByName = async (name: string) => {
+    try {
+        const categories: Category[] = await getAllCategories();
+        const category = categories.find((cat) => cat.name === name);
+        if (!category) {
+            throw new Error('Категория не найдена');
+        }
+        return await deleteCategory(category._id);
+    } catch (error) {
+        console.error(error);
+        throw error;
     }
 }

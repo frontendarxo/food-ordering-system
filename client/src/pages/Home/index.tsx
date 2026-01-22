@@ -6,6 +6,7 @@ import { CategoryFilter } from '../../features/api/menu/ui/CategoryFilter';
 import { FoodModal } from '../../features/api/menu/ui/FoodModal';
 import { CategoryModal } from '../../features/api/menu/ui/CategoryModal';
 import { CategoryEditModal } from '../../features/api/menu/ui/CategoryEditModal';
+import { CategoryDeleteModal } from '../../features/api/menu/ui/CategoryDeleteModal';
 import { useAuth } from '../../contexts/useAuth';
 import './style.css';
 
@@ -16,6 +17,7 @@ export const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isCategoryEditModalOpen, setIsCategoryEditModalOpen] = useState(false);
+  const [isCategoryDeleteModalOpen, setIsCategoryDeleteModalOpen] = useState(false);
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [isHorizontal, setIsHorizontal] = useState<boolean>(() => {
     const saved = localStorage.getItem('foodListHorizontal');
@@ -150,6 +152,14 @@ export const Home = () => {
                     <span className="home-category-dropdown-item-icon">✎</span>
                     <span className="home-category-dropdown-item-text">Изменить категории</span>
                   </button>
+                  <button
+                    className="home-category-dropdown-item"
+                    onClick={() => handleCategoryAction(() => setIsCategoryDeleteModalOpen(true))}
+                    aria-label="Удалить категорию"
+                  >
+                    <span className="home-category-dropdown-item-icon">🗑</span>
+                    <span className="home-category-dropdown-item-text">Удалить категорию</span>
+                  </button>
                 </div>
               )}
             </div>
@@ -213,6 +223,10 @@ export const Home = () => {
           <CategoryEditModal
             isOpen={isCategoryEditModalOpen}
             onClose={() => setIsCategoryEditModalOpen(false)}
+          />
+          <CategoryDeleteModal
+            isOpen={isCategoryDeleteModalOpen}
+            onClose={() => setIsCategoryDeleteModalOpen(false)}
           />
           <FoodModal
             isOpen={isModalOpen}

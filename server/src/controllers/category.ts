@@ -1,8 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import { ConflictError } from "../errors/conflict.js";
 import Categories from "../modules/categoriesSchema.js";
+import Food from "../modules/FoodSchema.js";
 import { BadRequestError } from "../errors/bad-request.js";
 import { NotFoundError } from "../errors/not-found.js";
+import { invalidateFoodCache } from "../utils/cache.js";
 
 export const getAllCategories = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -59,11 +61,18 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
 export const deleteCategory = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const category = await Categories.findByIdAndDelete(id);
+        const category = await Categories.findById(id);
         if(!category) {
             throw new NotFoundError('Категория не найдена');
         }
-        res.status(204).json({ message: 'Категория удалена успешно', category: category.name });
+        
+        const categoryName = category.name;
+        
+        await Food.deleteMany({ category: categoryName });
+        await Categories.findByIdAndDelete(id);
+        await invalidateFoodCache();
+        
+        res.status(204).json({ message: 'Категория удалена успешно', category: categoryName });
     } catch (error) {
         next(error);
     }
