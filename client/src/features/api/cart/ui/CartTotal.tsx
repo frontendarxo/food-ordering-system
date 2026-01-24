@@ -105,7 +105,12 @@ export const CartTotal = ({ items }: CartTotalProps) => {
         deliveryMethod,
         address: deliveryMethod === 'доставка' ? address.trim() : undefined,
         paymentMethod,
-        location
+        location,
+        orderItems: items.map(item => ({
+          name: item.food.name,
+          quantity: item.quantity,
+          price: item.food.price,
+        })),
       });
       
       clearCart();

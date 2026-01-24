@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { deleteCategoryByName } from '../../../../api/category';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
-import { fetchCategories, fetchAllMenu, setSelectedCategory } from '../../../../store/slices/menuSlice';
+import { fetchCategories, fetchAllMenu, setSelectedCategory as setSelectedCategoryAction } from '../../../../store/slices/menuSlice';
 import './style.css';
 
 interface CategoryDeleteModalProps {
@@ -16,12 +16,12 @@ export const CategoryDeleteModal = ({ isOpen, onClose }: CategoryDeleteModalProp
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (isOpen) {
-      setSelectedCategory('');
-      setError('');
-    }
-  }, [isOpen]);
+  const handleClose = () => {
+    setSelectedCategory('');
+    setError('');
+    dispatch(setSelectedCategoryAction(''));
+    onClose();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,14 +38,14 @@ export const CategoryDeleteModal = ({ isOpen, onClose }: CategoryDeleteModalProp
       await deleteCategoryByName(selectedCategory);
       
       if (currentSelectedCategory === selectedCategory) {
-        dispatch(setSelectedCategory('all'));
+        dispatch(setSelectedCategoryAction('all'));
       }
       
       dispatch(fetchCategories());
       dispatch(fetchAllMenu());
       
       setIsSubmitting(false);
-      onClose();
+      handleClose();
     } catch (err: unknown) {
       setIsSubmitting(false);
       if (err instanceof Error) {
@@ -59,13 +59,13 @@ export const CategoryDeleteModal = ({ isOpen, onClose }: CategoryDeleteModalProp
   if (!isOpen) return null;
 
   return (
-    <div className="food-modal-overlay" onClick={onClose}>
+    <div className="food-modal-overlay" onClick={handleClose}>
       <div className="food-modal" onClick={(e) => e.stopPropagation()}>
         <div className="food-modal-header">
           <h2>Удалить категорию</h2>
           <button
             className="food-modal-close"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Закрыть"
           >
             ✕
@@ -93,7 +93,7 @@ export const CategoryDeleteModal = ({ isOpen, onClose }: CategoryDeleteModalProp
           <div className="food-modal-actions">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="food-modal-button food-modal-button-cancel"
               disabled={isSubmitting}
             >

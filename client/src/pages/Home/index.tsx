@@ -36,6 +36,30 @@ export const Home = () => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
+  useEffect(() => {
+    const handleOrientationChange = () => {
+      setTimeout(() => {
+        if (isHorizontal) {
+          const cards = document.querySelectorAll('.food-list-horizontal .food-card');
+          cards.forEach((card) => {
+            const element = card as HTMLElement;
+            element.style.width = '';
+            void element.offsetWidth;
+            element.style.width = '100%';
+          });
+        }
+      }, 150);
+    };
+
+    window.addEventListener('orientationchange', handleOrientationChange);
+    window.addEventListener('resize', handleOrientationChange);
+
+    return () => {
+      window.removeEventListener('orientationchange', handleOrientationChange);
+      window.removeEventListener('resize', handleOrientationChange);
+    };
+  }, [isHorizontal]);
+
   const handleCategoryChange = (category: string) => {
     dispatch(setSelectedCategory(category));
   };
@@ -78,7 +102,7 @@ export const Home = () => {
   const userLocation = user?.location;
 
   return (
-    <div className={`home ${isHorizontal ? 'home-horizontal' : ''}`}>
+    <div className={`home ${isHorizontal ? 'home-horizontal' : 'home-vertical'}`}>
       {isWorker && userLocation && (
         <div className="home-location-badge">
           <span className="home-location-icon">📍</span>

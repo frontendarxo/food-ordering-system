@@ -36,6 +36,7 @@
   max-width: clamp(400px, 80vw, 600px);
   margin: 0;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .food-list-vertical {
@@ -79,6 +80,8 @@
   aspect-ratio: auto;
   min-height: 150px;
   max-height: 200px;
+  width: 100%;
+  height: auto;
 }
 
 .food-list-horizontal .food-card-image-wrapper {
@@ -810,6 +813,15 @@
   /* Горизонтальные карточки - по 1 в ряд на мобильных */
   .food-list-horizontal {
     grid-template-columns: 1fr;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .food-list-horizontal .food-card {
+    width: 100%;
+    min-height: 150px;
+    max-height: 200px;
+    height: auto;
   }
 
   .food-category-title {
@@ -882,6 +894,44 @@
   .food-card-button {
     font-size: 12px;
     padding: 8px;
+  }
+}
+
+/* Исправление проблемы с пропорциями при смене ориентации */
+@media (orientation: landscape) and (max-width: 900px) {
+  .food-list-horizontal {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .food-list-horizontal .food-card {
+    width: 100% !important;
+    min-height: 150px;
+    max-height: 200px;
+    height: auto;
+  }
+
+  .food-list-horizontal .food-card-image-wrapper {
+    width: 40%;
+    flex-shrink: 0;
+  }
+
+  .food-list-horizontal .food-card-info {
+    width: 60%;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 900px) {
+  .food-list-horizontal {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .food-list-horizontal .food-card {
+    width: 100% !important;
+    min-height: 150px;
+    max-height: 200px;
+    height: auto;
   }
 }
 @keyframes slideInTop {

@@ -6,17 +6,24 @@ const WHATSAPP_PHONES: Record<Location, string> = {
   шатой: '+79656329595',
 };
 
+interface OrderItem {
+  name: string;
+  quantity: number;
+  price: number;
+}
+
 interface OrderData {
   phoneNumber: string;
   total: number;
   deliveryMethod: 'самовызов' | 'доставка';
   address?: string;
   paymentMethod: 'наличка' | 'карта';
+  orderItems: OrderItem[];
   location: Location;
 }
 
 export const sendOrderToWhatsApp = (orderData: OrderData) => {
-  const { phoneNumber, total, deliveryMethod, address, paymentMethod, location } = orderData;
+  const { phoneNumber, total, deliveryMethod, address, paymentMethod, location, orderItems } = orderData;
   
   const whatsappPhone = WHATSAPP_PHONES[location];
   
@@ -27,12 +34,18 @@ export const sendOrderToWhatsApp = (orderData: OrderData) => {
     message += `Адрес доставки: ${address}\n`;
   }
   
-  message += `Сумма заказа: ${formatPrice(total)}\n`;
-  message += `Метод оплаты: ${paymentMethod === 'наличка' ? 'Наличными' : 'Картой'}`;
-  
   if (deliveryMethod === 'самовызов') {
-    message += '\nСпособ получения: Самовывоз';
+    message += 'Способ получения: Самовывоз\n';
   }
+  
+  message += `\nТовары:\n`;
+  orderItems.forEach(item => {
+    const itemTotal = item.price * item.quantity;
+    message += `- ${item.name} x${item.quantity} = ${formatPrice(itemTotal)}\n`;
+  });
+  
+  message += `\nСумма заказа: ${formatPrice(total)}\n`;
+  message += `Метод оплаты: ${paymentMethod === 'наличка' ? 'Наличными' : 'Картой'}`;
   
   const encodedMessage = encodeURIComponent(message);
   const whatsappUrl = `https://wa.me/${whatsappPhone.replace(/[^0-9]/g, '')}?text=${encodedMessage}`;
