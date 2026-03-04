@@ -4,7 +4,19 @@
   gap: 6px;
   font-size: 12px;
   font-weight: 600;
+}
+
+.dashboard-live--on {
   color: #2e7d32;
+}
+
+.dashboard-live--off {
+  color: #757575;
+}
+
+.dashboard-live--off .dashboard-live-dot {
+  background: #9e9e9e;
+  animation: none;
 }
 
 .dashboard-live-dot {

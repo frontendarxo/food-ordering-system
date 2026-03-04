@@ -18,10 +18,14 @@ export const getAdmin = async (req: Request, res: Response, next: NextFunction) 
 
 export const getWorker = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (res.locals.userRole !== 'worker' || !res.locals.userLocation) {
-      throw new UnauthorizedError('Доступ только для работника с назначенной локацией');
+    if (res.locals.userRole !== 'worker') {
+      throw new UnauthorizedError('Доступ только для сотрудника');
     }
-    const data = await getWorkerDashboard(res.locals.userLocation);
+    const location = res.locals.userLocation;
+    if (!location) {
+      throw new UnauthorizedError('Локация не указана');
+    }
+    const data = await getWorkerDashboard(location);
     res.json(data);
   } catch (error) {
     next(error);

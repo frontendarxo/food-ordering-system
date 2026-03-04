@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { WS_URL } from '../../../api/config';
 import type { DashboardUpdateMessage } from '../api/types';
 
@@ -6,6 +6,7 @@ const RECONNECT_DELAY_MS = 3000;
 const MAX_RECONNECT_DELAY_MS = 30000;
 
 export function useDashboardWs(onUpdate: () => void, enabled: boolean) {
+  const [connected, setConnected] = useState(false);
   const onUpdateRef = useRef(onUpdate);
   const reconnectDelayRef = useRef(RECONNECT_DELAY_MS);
   const wsRef = useRef<WebSocket | null>(null);
@@ -15,6 +16,7 @@ export function useDashboardWs(onUpdate: () => void, enabled: boolean) {
 
   const connect = useCallback(() => {
     if (!enabled) return;
+    setConnected(false);
     try {
       const ws = new WebSocket(`${WS_URL}/ws`);
       wsRef.current = ws;
@@ -32,6 +34,7 @@ export function useDashboardWs(onUpdate: () => void, enabled: boolean) {
 
       ws.onclose = () => {
         wsRef.current = null;
+        setConnected(false);
         if (!enabled) return;
         timeoutRef.current = setTimeout(() => {
           reconnectDelayRef.current = Math.min(
@@ -44,8 +47,10 @@ export function useDashboardWs(onUpdate: () => void, enabled: boolean) {
 
       ws.onopen = () => {
         reconnectDelayRef.current = RECONNECT_DELAY_MS;
+        setConnected(true);
       };
     } catch {
+      setConnected(false);
       if (enabled) {
         timeoutRef.current = setTimeout(connect, RECONNECT_DELAY_MS);
       }
@@ -53,6 +58,9 @@ export function useDashboardWs(onUpdate: () => void, enabled: boolean) {
   }, [enabled]);
 
   useEffect(() => {
+    if (!enabled) {
+      setConnected(false);
+    }
     connect();
     return () => {
       if (timeoutRef.current) {
@@ -63,6 +71,8 @@ export function useDashboardWs(onUpdate: () => void, enabled: boolean) {
         wsRef.current.close();
         wsRef.current = null;
       }
+      setConnected(false);
     };
-  }, [connect]);
+  }, [connect, enabled]);
+  return { connected };
 }

@@ -20,11 +20,11 @@ export function useWorkerDashboard() {
     }
   }, []);
 
-  useDashboardWs(refetch, true);
+  const { connected } = useDashboardWs(refetch, true);
 
   useEffect(() => {
     refetch();
   }, [refetch]);
 
-  return { data, loading, error, refetch };
+  return { data, loading, error, refetch, wsConnected: connected };
 }

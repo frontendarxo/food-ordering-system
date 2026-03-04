@@ -15,6 +15,12 @@ export interface OrdersByStatus {
   count: number;
 }
 
+export interface OrdersByStatusByLocationItem {
+  location: string;
+  status: string;
+  count: number;
+}
+
 export interface OrdersPerHourItem {
   hour: number;
   count: number;
@@ -28,15 +34,22 @@ export interface TopDish {
   orderCount: number;
 }
 
+export interface AvgAcceptanceTimeByLocation {
+  location: string;
+  avgMinutes: number;
+  orderCount: number;
+}
+
 export interface AdminDashboardData {
   ordersByPeriod: OrdersByPeriod;
   revenueByLocation: RevenueByLocation[];
   ordersByStatus: OrdersByStatus[];
+  ordersByStatusByLocation: OrdersByStatusByLocationItem[];
   liveIncomingCount: number;
   ordersPerHour: OrdersPerHourItem[];
   topDishes: TopDish[];
   avgProcessingTimeMinutes: number;
-  locationComparison: RevenueByLocation[];
+  avgAcceptanceTimeByLocation: AvgAcceptanceTimeByLocation[];
 }
 
 export interface WorkerDashboardData {

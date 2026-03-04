@@ -13,19 +13,27 @@ import './Chart.css';
 
 interface OrdersPerHourChartProps {
   data: OrdersPerHourItem[];
+  isPeriodFilter?: boolean;
 }
 
-export const OrdersPerHourChart = memo(function OrdersPerHourChart({ data }: OrdersPerHourChartProps) {
+const TITLE_TODAY = 'Заказы по часам (сегодня)';
+const TITLE_PERIOD = 'Заказы по часам (период)';
+
+export const OrdersPerHourChart = memo(function OrdersPerHourChart({
+  data,
+  isPeriodFilter = false,
+}: OrdersPerHourChartProps) {
   const chartData = data.map((d) => ({
     hour: `${d.hour}:00`,
     count: d.count,
   }));
   const total = data.reduce((sum, d) => sum + d.count, 0);
+  const title = isPeriodFilter ? TITLE_PERIOD : TITLE_TODAY;
 
   if (chartData.length === 0) {
     return (
       <div className="dashboard-chart-wrap">
-        <h3 className="dashboard-chart-title">Заказы по часам (сегодня)</h3>
+        <h3 className="dashboard-chart-title">{title}</h3>
         <div className="dashboard-chart-total">Всего: <strong>0</strong></div>
         <div className="dashboard-chart-empty">Нет данных</div>
       </div>
@@ -34,7 +42,7 @@ export const OrdersPerHourChart = memo(function OrdersPerHourChart({ data }: Ord
 
   return (
     <div className="dashboard-chart-wrap">
-      <h3 className="dashboard-chart-title">Заказы по часам (сегодня)</h3>
+      <h3 className="dashboard-chart-title">{title}</h3>
       <div className="dashboard-chart-total">Всего: <strong>{total}</strong></div>
       <ResponsiveContainer width="100%" height={260}>
         <LineChart data={chartData} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>

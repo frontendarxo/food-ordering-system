@@ -1,7 +1,7 @@
-import { memo, lazy, Suspense } from 'react';
+import { memo, useMemo, lazy, Suspense } from 'react';
 import { LiveIndicator } from './LiveIndicator';
 import { KPICard } from './KPICard';
-import type { AdminDashboardData } from '../api/types';
+import type { AdminDashboardData, AvgAcceptanceTimeByLocation } from '../api/types';
 import type { DashboardDateRange } from '../api/dashboardApi';
 import './AdminDashboardContent.css';
 
@@ -17,14 +17,22 @@ const StatusDistributionChart = lazy(() =>
 const TopDishesTable = lazy(() =>
   import('./TopDishesTable').then((m) => ({ default: m.TopDishesTable }))
 );
-
-const LOCATION_LABELS: Record<string, string> = {
-  шатой: 'Шатой',
-  гикало: 'Гикало',
-};
+const StatusByLocationTable = lazy(() =>
+  import('./StatusByLocationTable').then((m) => ({ default: m.StatusByLocationTable }))
+);
 
 function formatRevenue(value: number): string {
   return new Intl.NumberFormat('ru-RU', { style: 'decimal' }).format(value) + ' ₽';
+}
+
+function getFasterLocationSummary(items: AvgAcceptanceTimeByLocation[]): string | null {
+  if (items.length < 2) return null;
+  const [a, b] = items;
+  const diff = Math.abs(a.avgMinutes - b.avgMinutes);
+  if (diff === 0) return 'Локации работают одинаково';
+  const faster = a.avgMinutes <= b.avgMinutes ? a.location : b.location;
+  const slower = a.avgMinutes <= b.avgMinutes ? b.location : a.location;
+  return `${faster} быстрее ${slower} на ${diff} мин`;
 }
 
 const ChartSkeleton = () => (
@@ -37,20 +45,28 @@ const ChartSkeleton = () => (
 interface AdminDashboardContentProps {
   data: AdminDashboardData;
   dateRange: DashboardDateRange | null;
+  wsConnected: boolean;
 }
+
+const LOCATION_LABELS: Record<string, string> = { шатой: 'Шатой', гикало: 'Гикало' };
 
 export const AdminDashboardContent = memo(function AdminDashboardContent({
   data,
   dateRange,
+  wsConnected,
 }: AdminDashboardContentProps) {
   const totalRevenue = data.revenueByLocation.reduce((sum, r) => sum + r.revenue, 0);
   const isPeriodFilter = dateRange !== null;
+  const acceptanceSummary = useMemo(
+    () => getFasterLocationSummary(data.avgAcceptanceTimeByLocation),
+    [data.avgAcceptanceTimeByLocation]
+  );
 
   return (
     <div className="dashboard-admin">
       <header className="dashboard-header">
         <h1 className="dashboard-title">Аналитика</h1>
-        <LiveIndicator />
+        <LiveIndicator connected={wsConnected} />
       </header>
 
       <section className="dashboard-kpi-grid">
@@ -63,9 +79,11 @@ export const AdminDashboardContent = memo(function AdminDashboardContent({
             <KPICard title="За месяц" value={data.ordersByPeriod.month} />
           </>
         )}
-        {!isPeriodFilter && (
-          <KPICard title="Новых (ожидают)" value={data.liveIncomingCount} subtitle="сегодня" />
-        )}
+        <KPICard
+          title="В ожидании"
+          value={data.liveIncomingCount}
+          subtitle={isPeriodFilter ? undefined : 'сегодня'}
+        />
         <KPICard title="Выручка (принятые)" value={formatRevenue(totalRevenue)} />
         <KPICard
           title="Среднее время обработки"
@@ -79,35 +97,49 @@ export const AdminDashboardContent = memo(function AdminDashboardContent({
       )}
 
       <section className="dashboard-charts-grid">
+        <div className="dashboard-acceptance-by-location">
+          <h3 className="dashboard-section-title">Время принятия заказа по локациям</h3>
+          {data.avgAcceptanceTimeByLocation.length === 0 ? (
+            <p className="dashboard-acceptance-empty">Нет данных за период</p>
+          ) : (
+            <>
+              <ul className="dashboard-acceptance-list">
+                {data.avgAcceptanceTimeByLocation.map((item) => (
+                  <li key={item.location}>
+                    <span className="dashboard-acceptance-location">
+                      {LOCATION_LABELS[item.location] ?? item.location}
+                    </span>
+                    <span className="dashboard-acceptance-value">
+                      {item.avgMinutes} мин
+                      {item.orderCount > 0 && (
+                        <span className="dashboard-acceptance-count"> ({item.orderCount})</span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              {acceptanceSummary && (
+                <p className="dashboard-acceptance-summary">{acceptanceSummary}</p>
+              )}
+            </>
+          )}
+        </div>
         <Suspense fallback={<ChartSkeleton />}>
           <RevenueChart data={data.revenueByLocation} />
         </Suspense>
         <Suspense fallback={<ChartSkeleton />}>
-          <OrdersPerHourChart data={data.ordersPerHour} />
+          <OrdersPerHourChart data={data.ordersPerHour} isPeriodFilter={isPeriodFilter} />
         </Suspense>
         <Suspense fallback={<ChartSkeleton />}>
           <StatusDistributionChart data={data.ordersByStatus} />
         </Suspense>
         <Suspense fallback={<ChartSkeleton />}>
+          <StatusByLocationTable data={data.ordersByStatusByLocation} />
+        </Suspense>
+        <Suspense fallback={<ChartSkeleton />}>
           <TopDishesTable items={data.topDishes} />
         </Suspense>
       </section>
-
-      {data.locationComparison.length > 0 && (
-        <section className="dashboard-location-kpi">
-          <h2 className="dashboard-section-title">По локациям</h2>
-          <div className="dashboard-kpi-grid">
-            {data.locationComparison.map((loc) => (
-              <KPICard
-                key={loc.location}
-                title={LOCATION_LABELS[loc.location] ?? loc.location}
-                value={formatRevenue(loc.revenue)}
-                subtitle={`${loc.orderCount} заказов`}
-              />
-            ))}
-          </div>
-        </section>
-      )}
     </div>
   );
 });

@@ -1,0 +1,49 @@
+.dashboard-status-by-location {
+  padding: 16px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #eee;
+}
+
+.dashboard-status-by-location .dashboard-chart-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.dashboard-status-by-location .dashboard-chart-empty {
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 14px;
+}
+
+.dashboard-status-by-location-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.dashboard-status-by-location-table th,
+.dashboard-status-by-location-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.dashboard-status-by-location-table th {
+  color: #666;
+  font-weight: 600;
+}
+
+.dashboard-status-by-location-table td:nth-child(n + 2) {
+  text-align: left;
+}
+
+.dashboard-status-by-location-table tbody tr:last-child td {
+  border-bottom: none;
+}

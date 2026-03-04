@@ -10,7 +10,7 @@ import type { DashboardDateRange } from '../../features/dashboard/api/dashboardA
 export const AdminDashboardPage = () => {
   const { isAuthenticated, user } = useAuth();
   const [dateRange, setDateRange] = useState<DashboardDateRange | null>(null);
-  const { data, loading, error } = useAdminDashboard(dateRange);
+  const { data, loading, error, wsConnected } = useAdminDashboard(dateRange);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -38,7 +38,7 @@ export const AdminDashboardPage = () => {
   return (
     <div className="dashboard-admin-page">
       <DashboardDateFilter value={dateRange} onChange={setDateRange} />
-      <AdminDashboardContent data={data} dateRange={dateRange} />
+      <AdminDashboardContent data={data} dateRange={dateRange} wsConnected={wsConnected} />
     </div>
   );
 };

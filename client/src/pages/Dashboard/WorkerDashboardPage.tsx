@@ -11,7 +11,7 @@ const LOCATION_LABELS: Record<string, string> = {
 
 export const WorkerDashboardPage = () => {
   const { isAuthenticated, user } = useAuth();
-  const { data, loading, error } = useWorkerDashboard();
+  const { data, loading, error, wsConnected } = useWorkerDashboard();
   const locationLabel = user?.location ? LOCATION_LABELS[user.location] ?? user.location : 'Локация';
 
   if (!isAuthenticated) {
@@ -41,6 +41,7 @@ export const WorkerDashboardPage = () => {
     <WorkerDashboardContent
       data={data}
       locationLabel={locationLabel}
+      wsConnected={wsConnected}
     />
   );
 };

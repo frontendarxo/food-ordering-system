@@ -37,6 +37,12 @@ export interface OrdersByStatus {
   count: number;
 }
 
+export interface OrdersByStatusByLocationItem {
+  location: string;
+  status: string;
+  count: number;
+}
+
 export interface OrdersPerHourItem {
   hour: number;
   count: number;
@@ -50,15 +56,22 @@ export interface TopDish {
   orderCount: number;
 }
 
+export interface AvgAcceptanceTimeByLocation {
+  location: string;
+  avgMinutes: number;
+  orderCount: number;
+}
+
 export interface AdminDashboardData {
   ordersByPeriod: OrdersByPeriod;
   revenueByLocation: RevenueByLocation[];
   ordersByStatus: OrdersByStatus[];
+  ordersByStatusByLocation: OrdersByStatusByLocationItem[];
   liveIncomingCount: number;
   ordersPerHour: OrdersPerHourItem[];
   topDishes: TopDish[];
   avgProcessingTimeMinutes: number;
-  locationComparison: RevenueByLocation[];
+  avgAcceptanceTimeByLocation: AvgAcceptanceTimeByLocation[];
 }
 
 export interface WorkerDashboardData {
@@ -131,9 +144,47 @@ async function getOrdersByStatus(
   }));
 }
 
-async function getLiveIncomingCount(query: Record<string, unknown> = {}): Promise<number> {
-  const { startOfToday } = getDateRanges();
-  return Order.countDocuments({ ...query, status: 'pending', created_at: { $gte: startOfToday } });
+const STATUS_ORDER = ['pending', 'confirmed', 'cancelled'] as const;
+
+async function getOrdersByStatusByLocation(
+  query: Record<string, unknown> = {},
+  dateRange: DateRange = null
+): Promise<OrdersByStatusByLocationItem[]> {
+  const dateMatch = dateRange ? { created_at: { $gte: dateRange.start, $lte: dateRange.end } } : {};
+  const result = await Order.aggregate([
+    { $match: { ...query, ...dateMatch } },
+    { $group: { _id: { location: '$location', status: '$status' }, count: { $sum: 1 } } },
+    { $project: { location: '$_id.location', status: '$_id.status', count: 1, _id: 0 } },
+  ]);
+  const byLocation = new Map<string, Record<string, number>>();
+  for (const row of result) {
+    const loc = String(row.location ?? '').trim();
+    const status = String(row.status ?? '').toLowerCase();
+    const count = Number(row.count) || 0;
+    if (!byLocation.has(loc)) byLocation.set(loc, { pending: 0, confirmed: 0, cancelled: 0 });
+    const map = byLocation.get(loc)!;
+    if (status === 'pending') map.pending = count;
+    else if (status === 'confirmed') map.confirmed = count;
+    else if (status === 'cancelled') map.cancelled = count;
+  }
+  const flat: OrdersByStatusByLocationItem[] = [];
+  for (const [location] of byLocation) {
+    const map = byLocation.get(location)!;
+    for (const status of STATUS_ORDER) {
+      flat.push({ location, status, count: map[status] ?? 0 });
+    }
+  }
+  return flat;
+}
+
+async function getLiveIncomingCount(
+  query: Record<string, unknown> = {},
+  dateRange: DateRange = null
+): Promise<number> {
+  const dateMatch = dateRange
+    ? { created_at: { $gte: dateRange.start, $lte: dateRange.end } }
+    : { created_at: { $gte: getDateRanges().startOfToday } };
+  return Order.countDocuments({ ...query, status: 'pending', ...dateMatch });
 }
 
 const DASHBOARD_TIMEZONE = process.env.DASHBOARD_TIMEZONE || 'Europe/Moscow';
@@ -245,6 +296,48 @@ async function getAvgProcessingTimeMinutes(
   return Math.round(avgMs / (60 * 1000));
 }
 
+async function getAvgAcceptanceTimeByLocation(
+  dateRange: DateRange = null
+): Promise<AvgAcceptanceTimeByLocation[]> {
+  const dateMatch = dateRange ? { created_at: { $gte: dateRange.start, $lte: dateRange.end } } : {};
+  const result = await Order.aggregate([
+    {
+      $match: {
+        status: 'confirmed',
+        statusChangedAt: { $exists: true, $ne: null },
+        ...dateMatch,
+      },
+    },
+    {
+      $project: {
+        location: 1,
+        diffMs: { $subtract: ['$statusChangedAt', '$created_at'] },
+      },
+    },
+    {
+      $group: {
+        _id: '$location',
+        avgMs: { $avg: '$diffMs' },
+        orderCount: { $sum: 1 },
+      },
+    },
+    { $sort: { avgMs: 1 } },
+    {
+      $project: {
+        location: '$_id',
+        avgMinutes: { $round: [{ $divide: ['$avgMs', 60 * 1000] }, 0] },
+        orderCount: 1,
+        _id: 0,
+      },
+    },
+  ]);
+  return result.map((r) => ({
+    location: String(r.location ?? ''),
+    avgMinutes: Number(r.avgMinutes) || 0,
+    orderCount: Number(r.orderCount) || 0,
+  }));
+}
+
 async function getCached<T>(key: string, fetchFn: () => Promise<T>): Promise<T> {
   try {
     if (redisClient.isOpen) {
@@ -282,8 +375,15 @@ export function parseDateRange(params: AdminDashboardParams): DateRange | null {
   return getDateRangeUTC(startDate, endDate, tz);
 }
 
+function getTodayRange(): DateRange {
+  const tz = process.env.DASHBOARD_TIMEZONE || 'Europe/Moscow';
+  const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date());
+  return getDateRangeUTC(todayStr, todayStr, tz);
+}
+
 export async function getAdminDashboard(params: AdminDashboardParams = {}): Promise<AdminDashboardData> {
   const dateRange = parseDateRange(params);
+  const rangeForMetrics = dateRange ?? getTodayRange();
   const cacheKey = dateRange
     ? `${CACHE_KEY_ADMIN_DATE_PREFIX}${params.startDate!}_${params.endDate!}`
     : CACHE_KEY_ADMIN;
@@ -293,28 +393,33 @@ export async function getAdminDashboard(params: AdminDashboardParams = {}): Prom
       ordersByPeriod,
       revenueByLocation,
       ordersByStatus,
+      ordersByStatusByLocation,
       liveIncomingCount,
       ordersPerHour,
       topDishes,
       avgProcessingTimeMinutes,
+      avgAcceptanceTimeByLocation,
     ] = await Promise.all([
       getOrdersByPeriod({}, dateRange),
-      getRevenueByLocation({}, dateRange),
-      getOrdersByStatus({}, dateRange),
-      dateRange ? Promise.resolve(0) : getLiveIncomingCount(),
-      getOrdersPerHour({}, 24, dateRange),
-      getTopDishes({}, 5, dateRange),
-      getAvgProcessingTimeMinutes({}, dateRange),
+      getRevenueByLocation({}, rangeForMetrics),
+      getOrdersByStatus({}, rangeForMetrics),
+      getOrdersByStatusByLocation({}, rangeForMetrics),
+      getLiveIncomingCount({}, rangeForMetrics),
+      getOrdersPerHour({}, 24, rangeForMetrics),
+      getTopDishes({}, 5, rangeForMetrics),
+      getAvgProcessingTimeMinutes({}, rangeForMetrics),
+      getAvgAcceptanceTimeByLocation(rangeForMetrics),
     ]);
     return {
       ordersByPeriod,
       revenueByLocation,
       ordersByStatus,
+      ordersByStatusByLocation,
       liveIncomingCount,
       ordersPerHour,
       topDishes,
       avgProcessingTimeMinutes,
-      locationComparison: revenueByLocation,
+      avgAcceptanceTimeByLocation,
     };
   });
 }

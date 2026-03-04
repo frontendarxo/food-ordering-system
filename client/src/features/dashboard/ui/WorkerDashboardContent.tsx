@@ -18,17 +18,19 @@ const ChartSkeleton = () => (
 interface WorkerDashboardContentProps {
   data: WorkerDashboardData;
   locationLabel: string;
+  wsConnected: boolean;
 }
 
 export const WorkerDashboardContent = memo(function WorkerDashboardContent({
   data,
   locationLabel,
+  wsConnected,
 }: WorkerDashboardContentProps) {
   return (
     <div className="dashboard-worker">
       <header className="dashboard-header">
         <h1 className="dashboard-title">Панель: {locationLabel}</h1>
-        <LiveIndicator />
+        <LiveIndicator connected={wsConnected} />
       </header>
 
       <section className="dashboard-kpi-grid">

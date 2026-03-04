@@ -57,6 +57,60 @@
   color: #333;
 }
 
+.dashboard-acceptance-by-location {
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.dashboard-acceptance-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dashboard-acceptance-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.dashboard-acceptance-list li:last-child {
+  border-bottom: none;
+}
+
+.dashboard-acceptance-location {
+  font-weight: 500;
+  color: #333;
+}
+
+.dashboard-acceptance-value {
+  color: #555;
+}
+
+.dashboard-acceptance-count {
+  font-size: 13px;
+  color: #888;
+}
+
+.dashboard-acceptance-summary {
+  margin: 12px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.dashboard-acceptance-empty {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
 .dashboard-chart-skeleton {
   min-height: 260px;
 }

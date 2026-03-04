@@ -69,18 +69,11 @@ export const Navbar = () => {
                 </>
               )}
               {user?.role === 'worker' && (
-                <>
-                  <li>
-                    <Link to="/worker/dashboard" onClick={closeMenu}>
-                      Аналитика
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/worker" onClick={closeMenu}>
-                      Заказы
-                    </Link>
-                  </li>
-                </>
+                <li>
+                  <Link to="/worker" onClick={closeMenu}>
+                    Заказы
+                  </Link>
+                </li>
               )}
               <li>
                 <button onClick={logout} className="navbar-logout">
