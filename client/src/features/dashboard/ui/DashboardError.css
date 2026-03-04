@@ -1,0 +1,53 @@
+.dashboard-error {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.dashboard-error-card {
+  max-width: 400px;
+  padding: 32px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  text-align: center;
+}
+
+.dashboard-error-message {
+  margin: 0 0 8px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #c62828;
+}
+
+.dashboard-error-hint {
+  margin: 0 0 20px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.dashboard-error-retry {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #fff;
+  background: #8a1538;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+
+.dashboard-error-retry:hover:not(:disabled) {
+  background: #6d0f2a;
+}
+
+.dashboard-error-retry:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

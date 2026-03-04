@@ -2,8 +2,10 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.75rem;
   font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .dashboard-live--on {
@@ -11,7 +13,7 @@
 }
 
 .dashboard-live--off {
-  color: #757575;
+  color: #616161;
 }
 
 .dashboard-live--off .dashboard-live-dot {

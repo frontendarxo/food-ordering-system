@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from 'react';
+import './ErrorBoundary.css';
 
 interface Props {
   children: ReactNode;
@@ -26,10 +27,20 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: '20px', color: 'white', textAlign: 'center' }}>
-          <h1>Что-то пошло не так</h1>
-          <p>{this.state.error?.message}</p>
-          <button onClick={() => window.location.reload()}>Перезагрузить страницу</button>
+        <div className="error-boundary">
+          <div className="error-boundary-card">
+            <h1 className="error-boundary-title">Что-то пошло не так</h1>
+            {this.state.error?.message && (
+              <p className="error-boundary-message">{this.state.error.message}</p>
+            )}
+            <button
+              type="button"
+              className="error-boundary-reload"
+              onClick={() => window.location.reload()}
+            >
+              Перезагрузить страницу
+            </button>
+          </div>
         </div>
       );
     }

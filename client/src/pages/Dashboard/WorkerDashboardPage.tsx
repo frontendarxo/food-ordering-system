@@ -1,4 +1,5 @@
 import { Navigate } from 'react-router-dom';
+import { DashboardError } from '../../features/dashboard/ui/DashboardError';
 import { WorkerDashboardContent } from '../../features/dashboard/ui/WorkerDashboardContent';
 import { DashboardSkeleton } from '../../features/dashboard/ui/DashboardSkeleton';
 import { useWorkerDashboard } from '../../features/dashboard/model/useWorkerDashboard';
@@ -11,7 +12,7 @@ const LOCATION_LABELS: Record<string, string> = {
 
 export const WorkerDashboardPage = () => {
   const { isAuthenticated, user } = useAuth();
-  const { data, loading, error, wsConnected } = useWorkerDashboard();
+  const { data, loading, error, refetch, wsConnected } = useWorkerDashboard();
   const locationLabel = user?.location ? LOCATION_LABELS[user.location] ?? user.location : 'Локация';
 
   if (!isAuthenticated) {
@@ -26,11 +27,7 @@ export const WorkerDashboardPage = () => {
   }
 
   if (error) {
-    return (
-      <div style={{ padding: 24, textAlign: 'center', color: '#d32f2f' }}>
-        {error}
-      </div>
-    );
+    return <DashboardError message={error} onRetry={refetch} />;
   }
 
   if (!data) {

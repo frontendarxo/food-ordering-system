@@ -7,9 +7,10 @@
 }
 
 .dashboard-date-filter-label {
-  font-size: 14px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: #333;
+  color: #fff;
 }
 
 .dashboard-date-filter-presets {
@@ -18,8 +19,10 @@
 }
 
 .dashboard-date-filter-btn {
+  font-family: 'Montserrat', sans-serif;
   padding: 8px 14px;
-  font-size: 13px;
+  font-size: 0.8125rem;
+  font-weight: 500;
   border: 1px solid #ddd;
   border-radius: 8px;
   background: #fff;
@@ -33,9 +36,9 @@
 }
 
 .dashboard-date-filter-btn.active {
-  background: #8A1538;
+  background: #ffd700;
   border-color: #8A1538;
-  color: #fff;
+  color: #8A1538;
 }
 
 .dashboard-date-filter-custom {
@@ -45,8 +48,9 @@
 }
 
 .dashboard-date-filter-input {
+  font-family: 'Montserrat', sans-serif;
   padding: 6px 10px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   border: 1px solid #ddd;
   border-radius: 6px;
 }

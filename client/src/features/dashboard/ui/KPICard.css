@@ -7,19 +7,23 @@
 }
 
 .dashboard-kpi-title {
-  font-size: 13px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 500;
   color: #666;
   margin-bottom: 4px;
 }
 
 .dashboard-kpi-value {
-  font-size: 24px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: #8A1538;
+  color: #8a1538;
 }
 
 .dashboard-kpi-subtitle {
-  font-size: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.75rem;
   color: #999;
   margin-top: 4px;
 }

@@ -8,20 +8,22 @@
 
 .dashboard-chart-title {
   margin: 0 0 4px;
-  font-size: 16px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
   font-weight: 600;
   color: #333;
 }
 
 .dashboard-chart-total {
   margin-bottom: 12px;
-  font-size: 14px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.875rem;
   color: #555;
 }
 
 .dashboard-chart-total strong {
-  font-size: 18px;
-  color: #8A1538;
+  font-size: 1.125rem;
+  color: #8a1538;
   font-weight: 700;
 }
 
@@ -30,6 +32,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: 'Montserrat', sans-serif;
   color: #999;
-  font-size: 14px;
+  font-size: 0.875rem;
 }

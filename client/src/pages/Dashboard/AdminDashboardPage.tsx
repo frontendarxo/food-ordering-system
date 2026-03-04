@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AdminDashboardContent } from '../../features/dashboard/ui/AdminDashboardContent';
 import { DashboardDateFilter } from '../../features/dashboard/ui/DashboardDateFilter';
+import { DashboardError } from '../../features/dashboard/ui/DashboardError';
 import { DashboardSkeleton } from '../../features/dashboard/ui/DashboardSkeleton';
 import { useAdminDashboard } from '../../features/dashboard/model/useAdminDashboard';
 import { useAuth } from '../../contexts/useAuth';
@@ -10,7 +11,7 @@ import type { DashboardDateRange } from '../../features/dashboard/api/dashboardA
 export const AdminDashboardPage = () => {
   const { isAuthenticated, user } = useAuth();
   const [dateRange, setDateRange] = useState<DashboardDateRange | null>(null);
-  const { data, loading, error, wsConnected } = useAdminDashboard(dateRange);
+  const { data, loading, error, refetch, wsConnected } = useAdminDashboard(dateRange);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -24,11 +25,7 @@ export const AdminDashboardPage = () => {
   }
 
   if (error) {
-    return (
-      <div style={{ padding: 24, textAlign: 'center', color: '#d32f2f' }}>
-        {error}
-      </div>
-    );
+    return <DashboardError message={error} onRetry={refetch} />;
   }
 
   if (!data) {

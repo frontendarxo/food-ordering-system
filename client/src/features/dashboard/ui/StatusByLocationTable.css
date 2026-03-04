@@ -8,7 +8,8 @@
 
 .dashboard-status-by-location .dashboard-chart-title {
   margin: 0 0 12px;
-  font-size: 16px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
   font-weight: 600;
   color: #333;
 }
@@ -25,7 +26,8 @@
 .dashboard-status-by-location-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.875rem;
 }
 
 .dashboard-status-by-location-table th,

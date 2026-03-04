@@ -15,9 +15,11 @@
 
 .dashboard-worker .dashboard-title {
   margin: 0;
-  font-size: 28px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.75rem;
   font-weight: 700;
-  color: #333;
+  color: #fff;
+  letter-spacing: -0.02em;
 }
 
 .dashboard-worker .dashboard-kpi-grid {
