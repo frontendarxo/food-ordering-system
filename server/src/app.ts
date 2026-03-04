@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createServer } from 'http';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -9,12 +10,13 @@ if (!process.env.JWT_SECRET) {
     console.error('ОШИБКА: JWT_SECRET не установлен в переменных окружения');
     process.exit(1);
 }
-import cookieParser  from 'cookie-parser'
+import cookieParser from 'cookie-parser';
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import { handleError } from './middlewares/handleError.js';
 import router from './routers/index.js';
+import { attachWebSocket } from './ws/server.js';
 import './utils/redis.js';
 
 const app = express();
@@ -66,7 +68,9 @@ app.use(router);
 app.use(handleError);
 
 const PORT = process.env.PORT || '3000';
+const httpServer = createServer(app);
+attachWebSocket(httpServer);
 
-app.listen(parseInt(PORT), () => {
+httpServer.listen(parseInt(PORT), () => {
   console.log(`Server is running on port ${PORT}`);
 });

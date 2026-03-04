@@ -13,6 +13,8 @@ import { NotFoundError } from "../errors/not-found.js";
 import { BadRequestError } from "../errors/bad-request.js";
 import { UnauthorizedError } from "../errors/unauthorized.js";
 import { invalidateOrderCache } from "../utils/cache.js";
+import { publishOrderCreated, publishOrderStatusUpdated, } from "../services/dashboardEvents.js";
+import { invalidateDashboardCache } from "../services/analyticsService.js";
 const requireAdminOrWorker = (userRole) => {
     if (userRole !== 'admin' && userRole !== 'worker') {
         throw new UnauthorizedError('Только администратор или работник могут выполнять эту операцию');
@@ -73,6 +75,7 @@ export const createOrder = (req, res, next) => __awaiter(void 0, void 0, void 0,
         yield order.save();
         yield order.populate('items.food');
         yield invalidateOrderCache();
+        publishOrderCreated(String(order._id), String(order.location));
         res.status(201).json({
             message: 'Заказ создан успешно',
             order
@@ -116,6 +119,7 @@ export const updateOrderStatus = (req, res, next) => __awaiter(void 0, void 0, v
             throw new NotFoundError('Заказ не найден');
         }
         yield invalidateOrderCache();
+        publishOrderStatusUpdated(String(order._id), String(order.location));
         res.status(200).json({ order });
     }
     catch (error) {
@@ -131,6 +135,7 @@ export const deleteOrder = (req, res, next) => __awaiter(void 0, void 0, void 0,
             throw new NotFoundError('Заказ не найден');
         }
         yield invalidateOrderCache();
+        invalidateDashboardCache();
         res.status(200).json({ message: 'Заказ удален', orderId: id });
     }
     catch (error) {

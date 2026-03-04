@@ -1,0 +1,38 @@
+.dashboard-skeleton-card {
+  padding: 16px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #eee;
+}
+
+.dashboard-skeleton-line {
+  height: 16px;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e8e8e8 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: dashboard-skeleton-shine 1.2s ease-in-out infinite;
+}
+
+.dashboard-skeleton-title {
+  width: 60%;
+  margin-bottom: 12px;
+}
+
+.dashboard-skeleton-value {
+  width: 40%;
+  height: 24px;
+}
+
+@keyframes dashboard-skeleton-shine {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

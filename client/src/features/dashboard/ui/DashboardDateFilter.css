@@ -1,0 +1,62 @@
+.dashboard-date-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.dashboard-date-filter-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.dashboard-date-filter-presets {
+  display: flex;
+  gap: 8px;
+}
+
+.dashboard-date-filter-btn {
+  padding: 8px 14px;
+  font-size: 13px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  color: #555;
+  cursor: pointer;
+}
+
+.dashboard-date-filter-btn:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+.dashboard-date-filter-btn.active {
+  background: #8A1538;
+  border-color: #8A1538;
+  color: #fff;
+}
+
+.dashboard-date-filter-custom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dashboard-date-filter-input {
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.dashboard-date-filter-input:focus {
+  outline: none;
+  border-color: #8A1538;
+}
+
+.dashboard-date-filter-sep {
+  color: #999;
+  font-size: 12px;
+}

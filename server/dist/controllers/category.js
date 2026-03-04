@@ -9,8 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { ConflictError } from "../errors/conflict.js";
 import Categories from "../modules/categoriesSchema.js";
+import Food from "../modules/FoodSchema.js";
 import { BadRequestError } from "../errors/bad-request.js";
 import { NotFoundError } from "../errors/not-found.js";
+import { invalidateFoodCache } from "../utils/cache.js";
 export const getAllCategories = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const categories = yield Categories.find({}).select('_id name');
@@ -66,11 +68,15 @@ export const updateCategory = (req, res, next) => __awaiter(void 0, void 0, void
 export const deleteCategory = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const category = yield Categories.findByIdAndDelete(id);
+        const category = yield Categories.findById(id);
         if (!category) {
             throw new NotFoundError('Категория не найдена');
         }
-        res.status(204).json({ message: 'Категория удалена успешно', category: category.name });
+        const categoryName = category.name;
+        yield Food.deleteMany({ category: categoryName });
+        yield Categories.findByIdAndDelete(id);
+        yield invalidateFoodCache();
+        res.status(204).json({ message: 'Категория удалена успешно', category: categoryName });
     }
     catch (error) {
         next(error);

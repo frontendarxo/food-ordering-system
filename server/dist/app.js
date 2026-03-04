@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import 'dotenv/config';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createServer } from 'http';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 if (!process.env.JWT_SECRET) {
@@ -22,10 +23,11 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import { handleError } from './middlewares/handleError.js';
 import router from './routers/index.js';
+import { attachWebSocket } from './ws/server.js';
 import './utils/redis.js';
 const app = express();
 const corsOptions = {
-    origin: process.env.FRONTEND_URL, // http://localhost:5173 - for development, process.env.FRONTEND_URL - for production
+    origin: 'http://localhost:5173', // http://localhost:5173 - for development, process.env.FRONTEND_URL - for production
     credentials: true,
     optionsSuccessStatus: 200,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
@@ -63,6 +65,8 @@ connectDB();
 app.use(router);
 app.use(handleError);
 const PORT = process.env.PORT || '3000';
-app.listen(parseInt(PORT), () => {
+const httpServer = createServer(app);
+attachWebSocket(httpServer);
+httpServer.listen(parseInt(PORT), () => {
     console.log(`Server is running on port ${PORT}`);
 });

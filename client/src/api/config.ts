@@ -1,4 +1,5 @@
-const BASE_URL = '/api'; // /api -for production, http://localhost:3000 - for development
+const BASE_URL = 'http://localhost:3000';
+const WS_URL = BASE_URL.replace(/^http/, 'ws');
 
-export { BASE_URL };
+export { BASE_URL, WS_URL };
 

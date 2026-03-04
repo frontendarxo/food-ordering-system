@@ -1,0 +1,25 @@
+.dashboard-kpi-card {
+  padding: 16px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #eee;
+}
+
+.dashboard-kpi-title {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.dashboard-kpi-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #8A1538;
+}
+
+.dashboard-kpi-subtitle {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}

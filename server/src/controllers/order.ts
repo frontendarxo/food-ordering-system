@@ -6,6 +6,11 @@ import { NotFoundError } from "../errors/not-found.js";
 import { BadRequestError } from "../errors/bad-request.js";
 import { UnauthorizedError } from "../errors/unauthorized.js";
 import { invalidateOrderCache } from "../utils/cache.js";
+import {
+  publishOrderCreated,
+  publishOrderStatusUpdated,
+} from "../services/dashboardEvents.js";
+import { invalidateDashboardCache } from "../services/analyticsService.js";
 
 const requireAdminOrWorker = (userRole: string | undefined): void => {
   if (userRole !== 'admin' && userRole !== 'worker') {
@@ -91,6 +96,7 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
 
         await order.populate('items.food');
         await invalidateOrderCache();
+        publishOrderCreated(String(order._id), String(order.location));
 
         res.status(201).json({ 
             message: 'Заказ создан успешно', 
@@ -148,6 +154,7 @@ export const updateOrderStatus = async (req: Request, res: Response, next: NextF
         }
 
         await invalidateOrderCache();
+        publishOrderStatusUpdated(String(order._id), String(order.location));
         res.status(200).json({ order });
     } catch (error) {
         next(error);
@@ -166,6 +173,7 @@ export const deleteOrder = async (req: Request, res: Response, next: NextFunctio
         }
 
         await invalidateOrderCache();
+        invalidateDashboardCache();
         res.status(200).json({ message: 'Заказ удален', orderId: id });
     } catch (error) {
         next(error);

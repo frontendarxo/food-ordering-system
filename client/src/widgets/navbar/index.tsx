@@ -55,18 +55,32 @@ export const Navbar = () => {
           {isAuthenticated && (
             <>
               {user?.role === 'admin' && (
-                <li>
-                  <Link to="/admin/orders" onClick={closeMenu}>
-                    Заказы
-                  </Link>
-                </li>
+                <>
+                  <li>
+                    <Link to="/admin/dashboard" onClick={closeMenu}>
+                      Аналитика
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/admin/orders" onClick={closeMenu}>
+                      Заказы
+                    </Link>
+                  </li>
+                </>
               )}
               {user?.role === 'worker' && (
-                <li>
-                  <Link to="/worker" onClick={closeMenu}>
-                    Заказы
-                  </Link>
-                </li>
+                <>
+                  <li>
+                    <Link to="/worker/dashboard" onClick={closeMenu}>
+                      Аналитика
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/worker" onClick={closeMenu}>
+                      Заказы
+                    </Link>
+                  </li>
+                </>
               )}
               <li>
                 <button onClick={logout} className="navbar-logout">
