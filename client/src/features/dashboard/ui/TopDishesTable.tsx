@@ -2,6 +2,8 @@ import { memo } from 'react';
 import type { TopDish } from '../api/types';
 import './TopDishesTable.css';
 
+const TOP_DISHES_TITLE = 'Часто заказывают';
+
 interface TopDishesTableProps {
   items: TopDish[];
 }
@@ -10,7 +12,7 @@ export const TopDishesTable = memo(function TopDishesTable({ items }: TopDishesT
   if (items.length === 0) {
     return (
       <div className="dashboard-top-dishes">
-        <h3 className="dashboard-chart-title">Топ-5 блюд</h3>
+        <h3 className="dashboard-chart-title">{TOP_DISHES_TITLE}</h3>
         <div className="dashboard-chart-empty">Нет данных</div>
       </div>
     );
@@ -18,7 +20,7 @@ export const TopDishesTable = memo(function TopDishesTable({ items }: TopDishesT
 
   return (
     <div className="dashboard-top-dishes">
-      <h3 className="dashboard-chart-title">Топ-5 блюд</h3>
+      <h3 className="dashboard-chart-title">{TOP_DISHES_TITLE}</h3>
       <table className="dashboard-top-dishes-table">
         <thead>
           <tr>

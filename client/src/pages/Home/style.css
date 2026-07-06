@@ -4,6 +4,10 @@
   margin: 0 auto;
 }
 
+.home-horizontal {
+  max-width: 1480px;
+}
+
 .home-location-badge {
   display: flex;
   align-items: center;

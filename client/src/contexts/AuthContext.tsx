@@ -47,7 +47,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return true;
     } catch (error) {
       console.error('Ошибка входа:', error);
-      return false;
+      try {
+        const { user: currentUser } = await getCurrentUser();
+        setUser(currentUser);
+        return true;
+      } catch {
+        setUser(null);
+        return false;
+      }
     }
   };
 

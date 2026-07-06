@@ -1,22 +1,26 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getAllMenu, getCategory } from '../../api/menu';
+import { getAllMenu, getCategory, getPopularFoods as getPopularFoodsApi } from '../../api/menu';
 import { getAllCategories } from '../../api/category';
-import type { Food } from '../../types/food';
+import type { Food, Location } from '../../types/food';
 
 interface MenuState {
   foods: Food[];
+  popularFoods: Food[];
   categories: string[];
   selectedCategory: string;
   isLoading: boolean;
+  isLoadingPopular: boolean;
   isLoadingCategories: boolean;
   error: string | null;
 }
 
 const initialState: MenuState = {
   foods: [],
+  popularFoods: [],
   categories: [],
   selectedCategory: 'all',
   isLoading: false,
+  isLoadingPopular: false,
   isLoadingCategories: false,
   error: null,
 };
@@ -34,6 +38,15 @@ export const fetchCategory = createAsyncThunk('menu/fetchCategory', async (categ
 export const fetchCategories = createAsyncThunk('menu/fetchCategories', async () => {
   const categories = await getAllCategories();
   return categories.map((cat: { _id: string; name: string }) => cat.name);
+});
+
+export const fetchPopularFoods = createAsyncThunk('menu/fetchPopularFoods', async (location: Location | null) => {
+  if (!location) {
+    return [];
+  }
+
+  const response = await getPopularFoodsApi(location);
+  return response.foods || [];
 });
 
 const menuSlice = createSlice({
@@ -84,6 +97,18 @@ const menuSlice = createSlice({
       .addCase(fetchCategories.rejected, (state, action) => {
         state.isLoadingCategories = false;
         state.error = action.error.message || 'Ошибка загрузки категорий';
+      })
+      .addCase(fetchPopularFoods.pending, (state) => {
+        state.isLoadingPopular = true;
+        state.error = null;
+      })
+      .addCase(fetchPopularFoods.fulfilled, (state, action) => {
+        state.isLoadingPopular = false;
+        state.popularFoods = action.payload || [];
+      })
+      .addCase(fetchPopularFoods.rejected, (state, action) => {
+        state.isLoadingPopular = false;
+        state.error = action.error.message || 'Ошибка загрузки популярных блюд';
       });
   },
 });

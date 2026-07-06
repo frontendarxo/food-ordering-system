@@ -1,10 +1,11 @@
 import Router from 'express';
-import { getAllFoods, getFoodByCategory, createFood, updateFoodPrice, updateFoodStock, updateFoodName, updateFoodImage, deleteFood } from '../controllers/food.js';
+import { getAllFoods, getPopularFoods, getFoodByCategory, createFood, updateFoodPrice, updateFoodStock, updateFoodName, updateFoodImage, deleteFood } from '../controllers/food.js';
 import { upload } from '../middlewares/upload.js';
 import { cacheMiddleware } from '../middlewares/cache.js';
 import { authenticate } from '../middlewares/auth.js';
 const router = Router();
 router.get('/', cacheMiddleware(), getAllFoods);
+router.get('/popular', getPopularFoods);
 router.get('/:category', cacheMiddleware(), getFoodByCategory);
 router.post('/', authenticate, upload.single('image'), createFood);
 router.patch('/:id/price', authenticate, updateFoodPrice);

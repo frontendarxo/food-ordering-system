@@ -5,6 +5,7 @@ const DASHBOARD_CACHE_TTL = 45;
 const CACHE_KEY_ADMIN = 'dashboard:admin';
 const CACHE_KEY_ADMIN_DATE_PREFIX = 'dashboard:admin:date:';
 const CACHE_KEY_WORKER_PREFIX = 'dashboard:worker:';
+const TOP_DISHES_LIMIT = 6;
 
 const TZ_OFFSET: Record<string, string> = {
   'Europe/Moscow': '+03:00',
@@ -52,6 +53,12 @@ export interface OrdersPerHourItem {
 export interface TopDish {
   foodId: string;
   name?: string;
+  totalQuantity: number;
+  orderCount: number;
+}
+
+export interface PopularFood {
+  foodId: string;
   totalQuantity: number;
   orderCount: number;
 }
@@ -265,6 +272,56 @@ async function getTopDishes(
   return result;
 }
 
+interface PopularFoodsByLocationParams {
+  limit?: number;
+  days?: number;
+}
+
+const DEFAULT_POPULAR_LIMIT = 8;
+const MAX_POPULAR_LIMIT = 20;
+const DEFAULT_POPULAR_DAYS = 30;
+const MAX_POPULAR_DAYS = 365;
+
+export async function getPopularFoodsByLocation(
+  location: string,
+  params: PopularFoodsByLocationParams = {}
+): Promise<PopularFood[]> {
+  const safeLimit = Math.max(1, Math.min(params.limit ?? DEFAULT_POPULAR_LIMIT, MAX_POPULAR_LIMIT));
+  const safeDays = Math.max(1, Math.min(params.days ?? DEFAULT_POPULAR_DAYS, MAX_POPULAR_DAYS));
+  const sinceDate = new Date();
+  sinceDate.setDate(sinceDate.getDate() - safeDays);
+
+  const result = await Order.aggregate([
+    {
+      $match: {
+        location,
+        status: 'confirmed',
+        created_at: { $gte: sinceDate },
+      },
+    },
+    { $unwind: '$items' },
+    {
+      $group: {
+        _id: '$items.food',
+        totalQuantity: { $sum: '$items.quantity' },
+        orderCount: { $sum: 1 },
+      },
+    },
+    { $sort: { totalQuantity: -1 } },
+    { $limit: safeLimit },
+    {
+      $project: {
+        foodId: { $toString: '$_id' },
+        totalQuantity: 1,
+        orderCount: 1,
+        _id: 0,
+      },
+    },
+  ]);
+
+  return result;
+}
+
 async function getAvgProcessingTimeMinutes(
   query: Record<string, unknown> = {},
   dateRange: DateRange = null
@@ -406,7 +463,7 @@ export async function getAdminDashboard(params: AdminDashboardParams = {}): Prom
       getOrdersByStatusByLocation({}, rangeForMetrics),
       getLiveIncomingCount({}, rangeForMetrics),
       getOrdersPerHour({}, 24, rangeForMetrics),
-      getTopDishes({}, 5, rangeForMetrics),
+      getTopDishes({}, TOP_DISHES_LIMIT, rangeForMetrics),
       getAvgProcessingTimeMinutes({}, rangeForMetrics),
       getAvgAcceptanceTimeByLocation(rangeForMetrics),
     ]);

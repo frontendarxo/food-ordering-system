@@ -34,6 +34,7 @@ export const getAllOrders = async (): Promise<{ orders: Order[] }> => {
     const response = await fetch(`${BASE_URL}/orders`, {
         credentials: 'include',
         headers: getHeaders(),
+        cache: 'no-store',
     });
     
     if (!response.ok) {

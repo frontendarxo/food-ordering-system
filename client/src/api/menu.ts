@@ -1,11 +1,13 @@
 import { BASE_URL } from './config';
 import { handleApiError } from './utils';
-import type { Food } from '../types/food';
+import type { Food, Location } from '../types/food';
+import { DEFAULT_POPULAR_DAYS, DEFAULT_POPULAR_LIMIT } from '../constants/menu';
 
 export const getAllMenu = async () => {
     try {
         const response = await fetch(`${BASE_URL}/foods`, {
-            credentials: 'include'
+            credentials: 'include',
+            cache: 'no-store',
         });
         
         if (!response.ok) {
@@ -20,12 +22,38 @@ export const getAllMenu = async () => {
 };
 
 export const getCategory = async (category: string) => {
-    const response = await fetch(`${BASE_URL}/foods/${category}`);
+    const response = await fetch(`${BASE_URL}/foods/${category}`, {
+        cache: 'no-store',
+        credentials: 'include',
+    });
     
     if (!response.ok) {
         await handleApiError(response, 'Ошибка загрузки категории');
     }
     
+    return response.json();
+};
+
+export const getPopularFoods = async (
+    location: Location,
+    limit: number = DEFAULT_POPULAR_LIMIT,
+    days: number = DEFAULT_POPULAR_DAYS
+): Promise<{ foods: Food[] }> => {
+    const query = new URLSearchParams({
+        location,
+        limit: String(limit),
+        days: String(days),
+    });
+
+    const response = await fetch(`${BASE_URL}/foods/popular?${query.toString()}`, {
+        credentials: 'include',
+        cache: 'no-store',
+    });
+
+    if (!response.ok) {
+        await handleApiError(response, 'Ошибка загрузки популярных блюд');
+    }
+
     return response.json();
 };
 

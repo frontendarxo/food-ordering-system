@@ -548,7 +548,7 @@ export const AdminOrders = () => {
 
   const emptyOrdersContent = (
     <div className="admin-orders-empty">
-      <div className="admin-orders-empty-icon">📦</div>
+      <div className="admin-orders-empty-icon">🍽️</div>
       <h2>Нет заказов</h2>
       <p>Заказы будут отображаться здесь</p>
     </div>

@@ -10,7 +10,7 @@ export const OrderList = ({ orders }: OrderListProps) => {
   if (!orders || orders.length === 0) {
     return (
       <div className="order-list-empty">
-        <div className="order-list-empty-icon">📦</div>
+        <div className="order-list-empty-icon">🍽️</div>
         <h2 className="order-list-empty-title">У вас пока нет заказов</h2>
         <p className="order-list-empty-text">
           Когда вы сделаете заказ, он появится здесь

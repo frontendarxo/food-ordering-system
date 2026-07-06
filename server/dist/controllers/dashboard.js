@@ -25,10 +25,14 @@ export const getAdmin = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
 });
 export const getWorker = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (res.locals.userRole !== 'worker' || !res.locals.userLocation) {
-            throw new UnauthorizedError('Доступ только для работника с назначенной локацией');
+        if (res.locals.userRole !== 'worker') {
+            throw new UnauthorizedError('Доступ только для сотрудника');
         }
-        const data = yield getWorkerDashboard(res.locals.userLocation);
+        const location = res.locals.userLocation;
+        if (!location) {
+            throw new UnauthorizedError('Локация не указана');
+        }
+        const data = yield getWorkerDashboard(location);
         res.json(data);
     }
     catch (error) {

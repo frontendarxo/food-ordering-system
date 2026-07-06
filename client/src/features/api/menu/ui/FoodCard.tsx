@@ -6,10 +6,11 @@ import { useAuth } from '../../../../contexts/useAuth';
 import { useLocation } from '../../../../contexts/useLocation';
 import { updateFoodPrice, deleteFood, updateFoodStock, updateFoodName, updateFoodImage } from '../../../../api/menu';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
-import { fetchAllMenu } from '../../../../store/slices/menuSlice';
+import { fetchAllMenu, fetchPopularFoods } from '../../../../store/slices/menuSlice';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { QuantitySelector } from '../../cart/ui';
 import { getImageUrl } from '../../../../utils/imageUrl';
+import type { Location } from '../../../../types/food';
 import './style.css';
 
 interface FoodCardProps {
@@ -88,6 +89,29 @@ export const FoodCard = ({ food }: FoodCardProps) => {
     return cartItems.find(item => item.food._id === food._id);
   }, [cartItems, food._id]);
 
+  const getPopularLocationForRefresh = (): Location | null => {
+    if (isWorker) {
+      return workerLocation ?? null;
+    }
+
+    if (!isAdmin) {
+      return userLocation ?? null;
+    }
+
+    return null;
+  };
+
+  const refreshMenuData = async () => {
+    const requests: Array<Promise<unknown>> = [dispatch(fetchAllMenu()).unwrap()];
+    const popularLocation = getPopularLocationForRefresh();
+
+    if (popularLocation) {
+      requests.push(dispatch(fetchPopularFoods(popularLocation)).unwrap());
+    }
+
+    await Promise.all(requests);
+  };
+
   const handleAddToCart = () => {
     addItem(food, 1);
     setShowNotification(true);
@@ -128,7 +152,7 @@ export const FoodCard = ({ food }: FoodCardProps) => {
     try {
       await updateFoodPrice(food._id, newPrice);
       setIsEditingPrice(false);
-      dispatch(fetchAllMenu());
+      await refreshMenuData();
     } catch {
       setPriceValue(food.price.toString());
       setIsEditingPrice(false);
@@ -149,7 +173,7 @@ export const FoodCard = ({ food }: FoodCardProps) => {
     try {
       await deleteFood(food._id);
       setShowDeleteModal(false);
-      dispatch(fetchAllMenu());
+      await refreshMenuData();
     } catch {
       setIsDeleting(false);
     }
@@ -168,8 +192,10 @@ export const FoodCard = ({ food }: FoodCardProps) => {
         : food.inStock;
       
       await updateFoodStock(food._id, !currentStatus, location);
-      dispatch(fetchAllMenu());
-    } catch {
+      await refreshMenuData();
+    } catch (error) {
+      console.error('Ошибка обновления наличия:', error);
+    } finally {
       setIsUpdatingStock(false);
     }
   };
@@ -189,7 +215,7 @@ export const FoodCard = ({ food }: FoodCardProps) => {
       }));
       
       await updateFoodStock(food._id, newStatus, location);
-      await dispatch(fetchAllMenu());
+      await refreshMenuData();
       setIsUpdatingStock(false);
     } catch {
       // Откатываем оптимистичное обновление при ошибке
@@ -218,7 +244,7 @@ export const FoodCard = ({ food }: FoodCardProps) => {
     try {
       await updateFoodName(food._id, trimmedName);
       setIsEditingName(false);
-      dispatch(fetchAllMenu());
+      await refreshMenuData();
     } catch {
       setNameValue(food.name);
       setIsEditingName(false);
@@ -265,7 +291,7 @@ export const FoodCard = ({ food }: FoodCardProps) => {
       setIsEditingImage(false);
       setImageFile(null);
       setImagePreview(null);
-      dispatch(fetchAllMenu());
+      await refreshMenuData();
     } catch {
       setIsEditingImage(false);
       setImageFile(null);

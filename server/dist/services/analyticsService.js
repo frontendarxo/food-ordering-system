@@ -13,6 +13,7 @@ const DASHBOARD_CACHE_TTL = 45;
 const CACHE_KEY_ADMIN = 'dashboard:admin';
 const CACHE_KEY_ADMIN_DATE_PREFIX = 'dashboard:admin:date:';
 const CACHE_KEY_WORKER_PREFIX = 'dashboard:worker:';
+const TOP_DISHES_LIMIT = 6;
 const TZ_OFFSET = {
     'Europe/Moscow': '+03:00',
     'Asia/Dubai': '+04:00',
@@ -82,10 +83,47 @@ function getOrdersByStatus() {
         });
     });
 }
+const STATUS_ORDER = ['pending', 'confirmed', 'cancelled'];
+function getOrdersByStatusByLocation() {
+    return __awaiter(this, arguments, void 0, function* (query = {}, dateRange = null) {
+        var _a, _b, _c;
+        const dateMatch = dateRange ? { created_at: { $gte: dateRange.start, $lte: dateRange.end } } : {};
+        const result = yield Order.aggregate([
+            { $match: Object.assign(Object.assign({}, query), dateMatch) },
+            { $group: { _id: { location: '$location', status: '$status' }, count: { $sum: 1 } } },
+            { $project: { location: '$_id.location', status: '$_id.status', count: 1, _id: 0 } },
+        ]);
+        const byLocation = new Map();
+        for (const row of result) {
+            const loc = String((_a = row.location) !== null && _a !== void 0 ? _a : '').trim();
+            const status = String((_b = row.status) !== null && _b !== void 0 ? _b : '').toLowerCase();
+            const count = Number(row.count) || 0;
+            if (!byLocation.has(loc))
+                byLocation.set(loc, { pending: 0, confirmed: 0, cancelled: 0 });
+            const map = byLocation.get(loc);
+            if (status === 'pending')
+                map.pending = count;
+            else if (status === 'confirmed')
+                map.confirmed = count;
+            else if (status === 'cancelled')
+                map.cancelled = count;
+        }
+        const flat = [];
+        for (const [location] of byLocation) {
+            const map = byLocation.get(location);
+            for (const status of STATUS_ORDER) {
+                flat.push({ location, status, count: (_c = map[status]) !== null && _c !== void 0 ? _c : 0 });
+            }
+        }
+        return flat;
+    });
+}
 function getLiveIncomingCount() {
-    return __awaiter(this, arguments, void 0, function* (query = {}) {
-        const { startOfToday } = getDateRanges();
-        return Order.countDocuments(Object.assign(Object.assign({}, query), { status: 'pending', created_at: { $gte: startOfToday } }));
+    return __awaiter(this, arguments, void 0, function* (query = {}, dateRange = null) {
+        const dateMatch = dateRange
+            ? { created_at: { $gte: dateRange.start, $lte: dateRange.end } }
+            : { created_at: { $gte: getDateRanges().startOfToday } };
+        return Order.countDocuments(Object.assign(Object.assign(Object.assign({}, query), { status: 'pending' }), dateMatch));
     });
 }
 const DASHBOARD_TIMEZONE = process.env.DASHBOARD_TIMEZONE || 'Europe/Moscow';
@@ -159,6 +197,47 @@ function getTopDishes() {
         return result;
     });
 }
+const DEFAULT_POPULAR_LIMIT = 8;
+const MAX_POPULAR_LIMIT = 20;
+const DEFAULT_POPULAR_DAYS = 30;
+const MAX_POPULAR_DAYS = 365;
+export function getPopularFoodsByLocation(location_1) {
+    return __awaiter(this, arguments, void 0, function* (location, params = {}) {
+        var _a, _b;
+        const safeLimit = Math.max(1, Math.min((_a = params.limit) !== null && _a !== void 0 ? _a : DEFAULT_POPULAR_LIMIT, MAX_POPULAR_LIMIT));
+        const safeDays = Math.max(1, Math.min((_b = params.days) !== null && _b !== void 0 ? _b : DEFAULT_POPULAR_DAYS, MAX_POPULAR_DAYS));
+        const sinceDate = new Date();
+        sinceDate.setDate(sinceDate.getDate() - safeDays);
+        const result = yield Order.aggregate([
+            {
+                $match: {
+                    location,
+                    status: 'confirmed',
+                    created_at: { $gte: sinceDate },
+                },
+            },
+            { $unwind: '$items' },
+            {
+                $group: {
+                    _id: '$items.food',
+                    totalQuantity: { $sum: '$items.quantity' },
+                    orderCount: { $sum: 1 },
+                },
+            },
+            { $sort: { totalQuantity: -1 } },
+            { $limit: safeLimit },
+            {
+                $project: {
+                    foodId: { $toString: '$_id' },
+                    totalQuantity: 1,
+                    orderCount: 1,
+                    _id: 0,
+                },
+            },
+        ]);
+        return result;
+    });
+}
 function getAvgProcessingTimeMinutes() {
     return __awaiter(this, arguments, void 0, function* (query = {}, dateRange = null) {
         var _a;
@@ -183,6 +262,46 @@ function getAvgProcessingTimeMinutes() {
         if (avgMs == null || avgMs < 0)
             return 0;
         return Math.round(avgMs / (60 * 1000));
+    });
+}
+function getAvgAcceptanceTimeByLocation() {
+    return __awaiter(this, arguments, void 0, function* (dateRange = null) {
+        const dateMatch = dateRange ? { created_at: { $gte: dateRange.start, $lte: dateRange.end } } : {};
+        const result = yield Order.aggregate([
+            {
+                $match: Object.assign({ status: 'confirmed', statusChangedAt: { $exists: true, $ne: null } }, dateMatch),
+            },
+            {
+                $project: {
+                    location: 1,
+                    diffMs: { $subtract: ['$statusChangedAt', '$created_at'] },
+                },
+            },
+            {
+                $group: {
+                    _id: '$location',
+                    avgMs: { $avg: '$diffMs' },
+                    orderCount: { $sum: 1 },
+                },
+            },
+            { $sort: { avgMs: 1 } },
+            {
+                $project: {
+                    location: '$_id',
+                    avgMinutes: { $round: [{ $divide: ['$avgMs', 60 * 1000] }, 0] },
+                    orderCount: 1,
+                    _id: 0,
+                },
+            },
+        ]);
+        return result.map((r) => {
+            var _a;
+            return ({
+                location: String((_a = r.location) !== null && _a !== void 0 ? _a : ''),
+                avgMinutes: Number(r.avgMinutes) || 0,
+                orderCount: Number(r.orderCount) || 0,
+            });
+        });
     });
 }
 function getCached(key, fetchFn) {
@@ -220,31 +339,40 @@ export function parseDateRange(params) {
     const tz = process.env.DASHBOARD_TIMEZONE || 'Europe/Moscow';
     return getDateRangeUTC(startDate, endDate, tz);
 }
+function getTodayRange() {
+    const tz = process.env.DASHBOARD_TIMEZONE || 'Europe/Moscow';
+    const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date());
+    return getDateRangeUTC(todayStr, todayStr, tz);
+}
 export function getAdminDashboard() {
     return __awaiter(this, arguments, void 0, function* (params = {}) {
         const dateRange = parseDateRange(params);
+        const rangeForMetrics = dateRange !== null && dateRange !== void 0 ? dateRange : getTodayRange();
         const cacheKey = dateRange
             ? `${CACHE_KEY_ADMIN_DATE_PREFIX}${params.startDate}_${params.endDate}`
             : CACHE_KEY_ADMIN;
         return getCached(cacheKey, () => __awaiter(this, void 0, void 0, function* () {
-            const [ordersByPeriod, revenueByLocation, ordersByStatus, liveIncomingCount, ordersPerHour, topDishes, avgProcessingTimeMinutes,] = yield Promise.all([
+            const [ordersByPeriod, revenueByLocation, ordersByStatus, ordersByStatusByLocation, liveIncomingCount, ordersPerHour, topDishes, avgProcessingTimeMinutes, avgAcceptanceTimeByLocation,] = yield Promise.all([
                 getOrdersByPeriod({}, dateRange),
-                getRevenueByLocation({}, dateRange),
-                getOrdersByStatus({}, dateRange),
-                dateRange ? Promise.resolve(0) : getLiveIncomingCount(),
-                getOrdersPerHour({}, 24, dateRange),
-                getTopDishes({}, 5, dateRange),
-                getAvgProcessingTimeMinutes({}, dateRange),
+                getRevenueByLocation({}, rangeForMetrics),
+                getOrdersByStatus({}, rangeForMetrics),
+                getOrdersByStatusByLocation({}, rangeForMetrics),
+                getLiveIncomingCount({}, rangeForMetrics),
+                getOrdersPerHour({}, 24, rangeForMetrics),
+                getTopDishes({}, TOP_DISHES_LIMIT, rangeForMetrics),
+                getAvgProcessingTimeMinutes({}, rangeForMetrics),
+                getAvgAcceptanceTimeByLocation(rangeForMetrics),
             ]);
             return {
                 ordersByPeriod,
                 revenueByLocation,
                 ordersByStatus,
+                ordersByStatusByLocation,
                 liveIncomingCount,
                 ordersPerHour,
                 topDishes,
                 avgProcessingTimeMinutes,
-                locationComparison: revenueByLocation,
+                avgAcceptanceTimeByLocation,
             };
         }));
     });

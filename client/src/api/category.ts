@@ -6,12 +6,24 @@ export const createCategory = async (name: string) => {
         const response = await fetch(`${BASE_URL}/categories`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify({ name }),
             credentials: 'include'
         });
         if (!response.ok) {
+            const normalizedName = name.trim();
+            if (response.status === 503) {
+                try {
+                    const categories: Category[] = await getAllCategories();
+                    const exists = categories.some((cat) => cat.name === normalizedName);
+                    if (exists) {
+                        return { message: 'Категория создана успешно', category: normalizedName, reconciled: true };
+                    }
+                } catch (reconcileError) {
+                    console.error('Не удалось подтвердить создание категории после 503:', reconcileError);
+                }
+            }
             await handleApiError(response, 'Ошибка создания категории');
         }
         return response.json();
@@ -24,7 +36,8 @@ export const createCategory = async (name: string) => {
 export const getAllCategories = async () => {
     try {
         const response = await fetch(`${BASE_URL}/categories`, {
-            credentials: 'include'
+            credentials: 'include',
+            cache: 'no-store',
         });
         if (!response.ok) {
             await handleApiError(response, 'Ошибка получения категорий');

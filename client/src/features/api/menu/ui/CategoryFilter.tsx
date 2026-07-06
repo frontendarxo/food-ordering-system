@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { POPULAR_CATEGORY } from '../../../../constants/menu';
 import './style.css';
 
 interface CategoryFilterProps {
@@ -10,6 +11,10 @@ interface CategoryFilterProps {
 export const CategoryFilter = ({ categories, selectedCategory, onCategoryChange }: CategoryFilterProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const categoryOptions = useMemo(
+    () => [POPULAR_CATEGORY, ...categories.filter((category) => category !== POPULAR_CATEGORY)],
+    [categories]
+  );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -70,7 +75,7 @@ export const CategoryFilter = ({ categories, selectedCategory, onCategoryChange 
           >
             Все
           </button>
-          {categories.map((category) => (
+          {categoryOptions.map((category) => (
             <button
               key={category}
               className={`category-filter-item ${selectedCategory === category ? 'active' : ''}`}

@@ -13,10 +13,23 @@ import { BadRequestError } from "../errors/bad-request.js";
 import { UnauthorizedError } from "../errors/unauthorized.js";
 import { invalidateFoodCache } from "../utils/cache.js";
 import { optimizeImage } from "../utils/imageOptimizer.js";
+import { getPopularFoodsByLocation } from "../services/analyticsService.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const AVAILABLE_LOCATIONS = ['шатой', 'гикало'];
+const DEFAULT_POPULAR_LIMIT = 8;
+const DEFAULT_POPULAR_DAYS = 30;
+const MAX_POPULAR_LIMIT = 20;
+const MAX_POPULAR_DAYS = 365;
+const parsePositiveInteger = (value, fallback, maxValue) => {
+    const parsed = Number(value);
+    if (!Number.isInteger(parsed) || parsed <= 0) {
+        return fallback;
+    }
+    return Math.min(parsed, maxValue);
+};
 const requireAdmin = (userRole) => {
     if (userRole !== 'admin') {
         throw new UnauthorizedError('Только администратор может выполнять эту операцию');
@@ -115,6 +128,48 @@ export const getFoodByCategory = (req, res, next) => __awaiter(void 0, void 0, v
             });
             res.status(200).json({ foods: serializedFoods });
         }
+    }
+    catch (error) {
+        next(error);
+    }
+});
+export const getPopularFoods = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { location, limit, days } = req.query;
+        if (typeof location !== 'string' || !AVAILABLE_LOCATIONS.includes(location)) {
+            throw new BadRequestError('Локация должна быть "шатой" или "гикало"');
+        }
+        const parsedLimit = parsePositiveInteger(limit, DEFAULT_POPULAR_LIMIT, MAX_POPULAR_LIMIT);
+        const parsedDays = parsePositiveInteger(days, DEFAULT_POPULAR_DAYS, MAX_POPULAR_DAYS);
+        const popularFoods = yield getPopularFoodsByLocation(location, {
+            limit: parsedLimit,
+            days: parsedDays
+        });
+        if (popularFoods.length === 0) {
+            res.status(200).json({ foods: [] });
+            return;
+        }
+        const popularFoodIds = popularFoods.map(item => item.foodId);
+        const foods = yield Food.find({
+            _id: { $in: popularFoodIds },
+            locations: location
+        });
+        const foodById = new Map(foods.map(food => [food._id.toString(), food]));
+        const sortedFoods = popularFoodIds
+            .map(foodId => foodById.get(foodId))
+            .filter((food) => Boolean(food));
+        const serializedFoods = sortedFoods.map(food => {
+            const foodObj = food.toObject();
+            if (food.stockByLocation) {
+                const stockByLocationObj = {};
+                food.stockByLocation.forEach((value, key) => {
+                    stockByLocationObj[key] = value;
+                });
+                foodObj.stockByLocation = stockByLocationObj;
+            }
+            return foodObj;
+        });
+        res.status(200).json({ foods: serializedFoods });
     }
     catch (error) {
         next(error);

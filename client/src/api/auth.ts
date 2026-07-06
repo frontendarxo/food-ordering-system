@@ -42,6 +42,7 @@ export const logout = async (): Promise<void> => {
 export const getCurrentUser = async (): Promise<UserResponse> => {
   const response = await fetch(`${BASE_URL}/auth/me`, {
     credentials: 'include',
+    cache: 'no-store',
   });
 
   if (!response.ok) {

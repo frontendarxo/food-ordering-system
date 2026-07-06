@@ -22,6 +22,7 @@ export const fetchAdminDashboard = async (
   const response = await fetch(buildDashboardUrl(params), {
     credentials: 'include',
     headers: getHeaders(),
+    cache: 'no-store',
   });
   if (!response.ok) {
     await handleApiError(response, 'Ошибка загрузки дашборда');
@@ -33,6 +34,7 @@ export const fetchWorkerDashboard = async (): Promise<WorkerDashboardData> => {
   const response = await fetch(`${BASE_URL}/dashboard/worker`, {
     credentials: 'include',
     headers: getHeaders(),
+    cache: 'no-store',
   });
   if (!response.ok) {
     await handleApiError(response, 'Ошибка загрузки дашборда');

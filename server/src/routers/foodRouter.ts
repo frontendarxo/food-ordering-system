@@ -1,6 +1,7 @@
 import Router from 'express';
 import { 
     getAllFoods, 
+    getPopularFoods,
     getFoodByCategory,
     createFood,
     updateFoodPrice,
@@ -16,6 +17,7 @@ import { authenticate } from '../middlewares/auth.js';
 const router = Router();
 
 router.get('/', cacheMiddleware(), getAllFoods);
+router.get('/popular', getPopularFoods);
 router.get('/:category', cacheMiddleware(), getFoodByCategory);
 router.post('/', authenticate, upload.single('image'), createFood);
 router.patch('/:id/price', authenticate, updateFoodPrice);

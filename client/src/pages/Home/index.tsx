@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { fetchAllMenu, fetchCategories, setSelectedCategory } from '../../store/slices/menuSlice';
+import { fetchAllMenu, fetchCategories, fetchPopularFoods, setSelectedCategory } from '../../store/slices/menuSlice';
 import { FoodList } from '../../features/api/menu/ui/FoodList';
 import { CategoryFilter } from '../../features/api/menu/ui/CategoryFilter';
 import { FoodModal } from '../../features/api/menu/ui/FoodModal';
@@ -8,12 +8,14 @@ import { CategoryModal } from '../../features/api/menu/ui/CategoryModal';
 import { CategoryEditModal } from '../../features/api/menu/ui/CategoryEditModal';
 import { CategoryDeleteModal } from '../../features/api/menu/ui/CategoryDeleteModal';
 import { useAuth } from '../../contexts/useAuth';
+import { useLocation } from '../../contexts/useLocation';
 import './style.css';
 
 export const Home = () => {
   const dispatch = useAppDispatch();
-  const { foods, categories, selectedCategory, isLoading, error } = useAppSelector((state) => state.menu);
+  const { foods, popularFoods, categories, selectedCategory, isLoading, error } = useAppSelector((state) => state.menu);
   const { user } = useAuth();
+  const { location } = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isCategoryEditModalOpen, setIsCategoryEditModalOpen] = useState(false);
@@ -37,28 +39,14 @@ export const Home = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    const handleOrientationChange = () => {
-      setTimeout(() => {
-        if (isHorizontal) {
-          const cards = document.querySelectorAll('.food-list-horizontal .food-card');
-          cards.forEach((card) => {
-            const element = card as HTMLElement;
-            element.style.width = '';
-            void element.offsetWidth;
-            element.style.width = '100%';
-          });
-        }
-      }, 150);
-    };
-
-    window.addEventListener('orientationchange', handleOrientationChange);
-    window.addEventListener('resize', handleOrientationChange);
-
-    return () => {
-      window.removeEventListener('orientationchange', handleOrientationChange);
-      window.removeEventListener('resize', handleOrientationChange);
-    };
-  }, [isHorizontal]);
+    const selectedLocation =
+      user?.role === 'worker'
+        ? (user.location ?? null)
+        : user?.role === 'admin'
+        ? null
+        : location;
+    dispatch(fetchPopularFoods(selectedLocation));
+  }, [dispatch, location, user?.location, user?.role]);
 
   const handleCategoryChange = (category: string) => {
     dispatch(setSelectedCategory(category));
@@ -237,7 +225,12 @@ export const Home = () => {
           </button>
         </div>
       </div>
-      <FoodList foods={foods} selectedCategory={selectedCategory} isHorizontal={isHorizontal} />
+      <FoodList
+        foods={foods}
+        popularFoods={popularFoods}
+        selectedCategory={selectedCategory}
+        isHorizontal={isHorizontal}
+      />
       {isAdmin && (
         <>
           <CategoryModal

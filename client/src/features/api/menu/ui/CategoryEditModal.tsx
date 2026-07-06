@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { updateCategoryByName } from '../../../../api/category';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
-import { fetchCategories } from '../../../../store/slices/menuSlice';
+import { fetchAllMenu, fetchCategories } from '../../../../store/slices/menuSlice';
 import './style.css';
 
 interface CategoryEditModalProps {
@@ -54,7 +54,10 @@ export const CategoryEditModal = ({ isOpen, onClose }: CategoryEditModalProps) =
 
     try {
       await updateCategoryByName(selectedCategory, newName.trim());
-      dispatch(fetchCategories());
+      await Promise.all([
+        dispatch(fetchCategories()),
+        dispatch(fetchAllMenu()),
+      ]);
       onClose();
     } catch (err: unknown) {
       if (err instanceof Error) {
