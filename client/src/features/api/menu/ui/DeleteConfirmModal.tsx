@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import './style.css';
 
 interface DeleteConfirmModalProps {
@@ -17,7 +18,7 @@ export const DeleteConfirmModal = ({
 }: DeleteConfirmModalProps) => {
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="delete-confirm-overlay" onClick={onCancel}>
       <div className="delete-confirm-modal" onClick={(e) => e.stopPropagation()}>
         <div className="delete-confirm-icon">🗑️</div>
@@ -47,7 +48,8 @@ export const DeleteConfirmModal = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

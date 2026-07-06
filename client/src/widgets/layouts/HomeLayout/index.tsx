@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { Navbar } from '../../navbar';
 import { FloatingCartButton } from '../../floating-cart-button';
+import { FloatingLocationSwitcher } from '../../floating-location-switcher';
 import { useAuth } from '../../../contexts/useAuth';
 import './style.css';
 
@@ -8,7 +9,7 @@ export const HomeLayout = () => {
   const { user } = useAuth();
   const location = useLocation();
   const isCartPage = location.pathname === '/cart';
-  const showFloatingCart = user?.role !== 'admin' && user?.role !== 'worker' && !isCartPage;
+  const showCustomerFloatingWidgets = user?.role !== 'admin' && user?.role !== 'worker' && !isCartPage;
 
   return (
     <div className="home-layout">
@@ -16,7 +17,12 @@ export const HomeLayout = () => {
       <div className="home-layout-content">
         <Outlet />
       </div>
-      {showFloatingCart && <FloatingCartButton />}
+      {showCustomerFloatingWidgets && (
+        <>
+          <FloatingLocationSwitcher />
+          <FloatingCartButton />
+        </>
+      )}
     </div>
   );
 };

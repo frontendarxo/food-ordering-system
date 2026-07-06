@@ -23,8 +23,14 @@
   font-size: 14px;
 }
 
+.dashboard-top-dishes-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
 .dashboard-top-dishes-table {
   width: 100%;
+  min-width: 420px;
   border-collapse: collapse;
   font-size: 14px;
 }
@@ -41,6 +47,22 @@
   font-weight: 600;
 }
 
+.dashboard-top-dishes-table td:first-child {
+  overflow-wrap: anywhere;
+}
+
 .dashboard-top-dishes-table tbody tr:last-child td {
   border-bottom: none;
+}
+
+@media (max-width: 768px) {
+  .dashboard-top-dishes-table {
+    min-width: 400px;
+    font-size: 13px;
+  }
+
+  .dashboard-top-dishes-table th,
+  .dashboard-top-dishes-table td {
+    padding: 8px 10px;
+  }
 }

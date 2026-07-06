@@ -54,28 +54,30 @@ export const StatusByLocationTable = memo(function StatusByLocationTable({
   return (
     <div className="dashboard-status-by-location">
       <h3 className="dashboard-chart-title">Статусы по локациям</h3>
-      <table className="dashboard-status-by-location-table">
-        <thead>
-          <tr>
-            <th>Локация</th>
-            <th>Ожидает</th>
-            <th>Принят</th>
-            <th>Отменён</th>
-            <th>Всего</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.location}>
-              <td>{row.location}</td>
-              <td>{row.pending}</td>
-              <td>{row.confirmed}</td>
-              <td>{row.cancelled}</td>
-              <td>{row.total}</td>
+      <div className="dashboard-status-by-location-table-wrap">
+        <table className="dashboard-status-by-location-table">
+          <thead>
+            <tr>
+              <th>Локация</th>
+              <th>Ожидает</th>
+              <th>Принят</th>
+              <th>Отменён</th>
+              <th>Всего</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.location}>
+                <td>{row.location}</td>
+                <td>{row.pending}</td>
+                <td>{row.confirmed}</td>
+                <td>{row.cancelled}</td>
+                <td>{row.total}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 });

@@ -482,7 +482,11 @@ export const FoodCard = ({ food }: FoodCardProps) => {
 
   return (
     <>
-      <div className={`food-card ${!actualInStock ? 'food-card-out-of-stock' : ''}`}>
+      <div
+        className={`food-card ${!actualInStock ? 'food-card-out-of-stock' : ''} ${
+          isEditingImage ? 'food-card-editing-image' : ''
+        }`}
+      >
         {imageDisplay}
         {isAdmin && !isEditingImage && (
           <button

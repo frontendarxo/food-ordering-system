@@ -49,6 +49,10 @@
   margin-bottom: 24px;
 }
 
+.dashboard-charts-grid > * {
+  min-width: 0;
+}
+
 .dashboard-location-kpi {
   margin-top: 8px;
 }
@@ -139,5 +143,12 @@
   }
   100% {
     background-position: -200% 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-charts-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 }
