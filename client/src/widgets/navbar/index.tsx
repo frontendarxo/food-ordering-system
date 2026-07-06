@@ -24,8 +24,8 @@ export const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <Link to="/" className="navbar-logo" onClick={closeMenu}>
-          Qatar Food
+        <Link to="/" className="navbar-logo" onClick={closeMenu} aria-label="Главная">
+          <img src="/logo.png" alt="Qatar" className="navbar-logo-image" />
         </Link>
         <button
           className={`navbar-burger ${isMenuOpen ? 'active' : ''}`}

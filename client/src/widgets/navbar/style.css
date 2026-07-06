@@ -14,11 +14,17 @@
 }
 
 .navbar-logo {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: white;
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
   text-decoration: none;
   z-index: 1000;
+}
+
+.navbar-logo-image {
+  height: 64px;
+  width: auto;
+  display: block;
 }
 
 .navbar-burger {
@@ -143,6 +149,10 @@
 @media (max-width: 768px) {
   .navbar {
     padding: 1rem;
+  }
+
+  .navbar-logo-image {
+    height: 56px;
   }
 
   .navbar-burger {
