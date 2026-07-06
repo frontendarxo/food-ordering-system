@@ -37,6 +37,8 @@
   gap: 1.5rem;
   align-items: center;
   margin-bottom: 1rem;
+  position: relative;
+  z-index: 30;
 }
 
 .home-controls-top {

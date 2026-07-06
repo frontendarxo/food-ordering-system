@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { updateCategoryByName } from '../../../../api/category';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
-import { fetchAllMenu, fetchCategories } from '../../../../store/slices/menuSlice';
+import { fetchAllMenu, fetchCategories, setSelectedCategory as setSelectedCategoryAction } from '../../../../store/slices/menuSlice';
 import './style.css';
 
 interface CategoryEditModalProps {
@@ -11,15 +11,15 @@ interface CategoryEditModalProps {
 
 export const CategoryEditModal = ({ isOpen, onClose }: CategoryEditModalProps) => {
   const dispatch = useAppDispatch();
-  const { categories } = useAppSelector((state) => state.menu);
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const { categories, selectedCategory: activeCategory } = useAppSelector((state) => state.menu);
+  const [selectedCategory, setSelectedCategoryName] = useState('');
   const [newName, setNewName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
-      setSelectedCategory('');
+      setSelectedCategoryName('');
       setNewName('');
       setError('');
     }
@@ -51,9 +51,13 @@ export const CategoryEditModal = ({ isOpen, onClose }: CategoryEditModalProps) =
     }
 
     setIsSubmitting(true);
+    const trimmedName = newName.trim();
 
     try {
-      await updateCategoryByName(selectedCategory, newName.trim());
+      await updateCategoryByName(selectedCategory, trimmedName);
+      if (activeCategory === selectedCategory) {
+        dispatch(setSelectedCategoryAction(trimmedName));
+      }
       await Promise.all([
         dispatch(fetchCategories()),
         dispatch(fetchAllMenu()),
@@ -91,7 +95,7 @@ export const CategoryEditModal = ({ isOpen, onClose }: CategoryEditModalProps) =
             <select
               id="category-select"
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              onChange={(e) => setSelectedCategoryName(e.target.value)}
               required
               disabled={isSubmitting}
             >

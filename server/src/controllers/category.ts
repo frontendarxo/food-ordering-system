@@ -46,12 +46,18 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
         if (!categoryToUpdate) {
             throw new NotFoundError('Категория не найдена');
         }
+        const previousCategoryName = categoryToUpdate.name;
         const existingCategory = await Categories.findOne({ name: trimmedName, _id: { $ne: id } });
         if (existingCategory) {
             throw new ConflictError('Категория с таким названием уже существует');
         }
         categoryToUpdate.name = trimmedName;
         await categoryToUpdate.save();
+        await Food.updateMany(
+            { category: previousCategoryName },
+            { $set: { category: trimmedName } }
+        );
+        await invalidateFoodCache();
         res.status(200).json({ message: 'Категория обновлена успешно', category: categoryToUpdate.name });
     } catch (error) {   
         next(error);

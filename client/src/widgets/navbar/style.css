@@ -19,12 +19,17 @@
   line-height: 0;
   text-decoration: none;
   z-index: 1000;
+  height: 40px;
+  overflow: hidden;
 }
 
 .navbar-logo-image {
-  height: 64px;
+  height: 40px;
   width: auto;
   display: block;
+  max-width: 170px;
+  object-fit: contain;
+  mix-blend-mode: multiply;
 }
 
 .navbar-burger {
@@ -152,7 +157,8 @@
   }
 
   .navbar-logo-image {
-    height: 56px;
+    height: 34px;
+    max-width: 145px;
   }
 
   .navbar-burger {

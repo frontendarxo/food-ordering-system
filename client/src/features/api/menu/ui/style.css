@@ -3,6 +3,8 @@
   flex-direction: column;
   gap: clamp(2rem, 5vw, 3rem);
   width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 .food-category-section {
@@ -957,7 +959,7 @@
 
 .category-filter {
   position: relative;
-  z-index: 10;
+  z-index: 40;
 }
 
 .category-filter-button {
@@ -1094,47 +1096,49 @@
 
 .food-card-delete-button {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background: none;
-  border: none;
-  width: auto;
-  height: auto;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(220, 53, 69, 0.35);
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.92);
+  color: #b42318;
   cursor: pointer;
-  font-size: 2.5rem;
-  font-weight: 300;
-  color: #000;
+  font-size: 1.15rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
-  transition: color 0.2s;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transform: scale(0.92);
+  transition: all 0.2s ease;
   line-height: 1;
   padding: 0;
 }
 
-.food-card-delete-button:hover {
-  color: #dc3545;
-  animation: blink 0.5s ease-in-out;
+.food-card:hover .food-card-delete-button,
+.food-card-delete-button:focus-visible {
+  opacity: 1;
+  transform: scale(1);
 }
 
-.food-card-delete-button:active {
-  color: #dc3545;
-  animation: blink 0.3s ease-in-out;
+.food-card-delete-button:hover:not(:disabled) {
+  background-color: #fff1f1;
+  box-shadow: 0 3px 10px rgba(220, 53, 69, 0.25);
 }
 
 .food-card-delete-button:disabled {
-  opacity: 0.6;
+  opacity: 0.45;
   cursor: not-allowed;
-  animation: none;
 }
 
-@keyframes blink {
-  0%, 100% {
+@media (max-width: 768px) {
+  .food-card-delete-button {
     opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
+    transform: none;
   }
 }
 
