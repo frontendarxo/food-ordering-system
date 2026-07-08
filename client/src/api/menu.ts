@@ -1,6 +1,6 @@
 import { BASE_URL } from './config';
 import { handleApiError } from './utils';
-import type { Food, Location } from '../types/food';
+import type { Discount, Food, Location } from '../types/food';
 import { DEFAULT_POPULAR_DAYS, DEFAULT_POPULAR_LIMIT } from '../constants/menu';
 
 export const getAllMenu = async () => {
@@ -86,20 +86,34 @@ export const createFood = async (foodData: {
     return response.json();
 };
 
-export const updateFoodPrice = async (id: string, price: number): Promise<{ food: Food }> => {
-    const response = await fetch(`${BASE_URL}/foods/${id}/price`, {
+export const updateFood = async (id: string, foodData: {
+    name: string;
+    price: number;
+    category: string;
+    locations: Location[];
+    discount: Discount | null;
+    image?: File;
+}): Promise<{ food: Food }> => {
+    const formData = new FormData();
+    formData.append('name', foodData.name);
+    formData.append('price', foodData.price.toString());
+    formData.append('category', foodData.category);
+    formData.append('locations', JSON.stringify(foodData.locations));
+    formData.append('discount', foodData.discount ? JSON.stringify(foodData.discount) : '');
+    if (foodData.image) {
+        formData.append('image', foodData.image);
+    }
+
+    const response = await fetch(`${BASE_URL}/foods/${id}`, {
         method: 'PATCH',
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ price }),
+        body: formData,
     });
-    
+
     if (!response.ok) {
-        await handleApiError(response, 'Ошибка обновления цены');
+        await handleApiError(response, 'Ошибка обновления карточки');
     }
-    
+
     return response.json();
 };
 
@@ -119,40 +133,6 @@ export const updateFoodStock = async (
     
     if (!response.ok) {
         await handleApiError(response, 'Ошибка обновления наличия');
-    }
-    
-    return response.json();
-};
-
-export const updateFoodName = async (id: string, name: string): Promise<{ food: Food }> => {
-    const response = await fetch(`${BASE_URL}/foods/${id}/name`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name }),
-    });
-    
-    if (!response.ok) {
-        await handleApiError(response, 'Ошибка обновления названия');
-    }
-    
-    return response.json();
-};
-
-export const updateFoodImage = async (id: string, image: File): Promise<{ food: Food }> => {
-    const formData = new FormData();
-    formData.append('image', image);
-
-    const response = await fetch(`${BASE_URL}/foods/${id}/image`, {
-        method: 'PATCH',
-        credentials: 'include',
-        body: formData,
-    });
-    
-    if (!response.ok) {
-        await handleApiError(response, 'Ошибка обновления изображения');
     }
     
     return response.json();

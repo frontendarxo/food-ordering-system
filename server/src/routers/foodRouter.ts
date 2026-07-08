@@ -4,6 +4,7 @@ import {
     getPopularFoods,
     getFoodByCategory,
     createFood,
+    updateFood,
     updateFoodPrice,
     updateFoodStock,
     updateFoodName,
@@ -20,6 +21,7 @@ router.get('/', cacheMiddleware(), getAllFoods);
 router.get('/popular', getPopularFoods);
 router.get('/:category', cacheMiddleware(), getFoodByCategory);
 router.post('/', authenticate, upload.single('image'), createFood);
+router.patch('/:id', authenticate, upload.single('image'), updateFood);
 router.patch('/:id/price', authenticate, updateFoodPrice);
 router.patch('/:id/stock', authenticate, updateFoodStock);
 router.patch('/:id/name', authenticate, updateFoodName);

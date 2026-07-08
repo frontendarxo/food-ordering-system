@@ -2,6 +2,7 @@ import type { CartItem as CartItemType } from '../../../../types/food';
 import { useCartActions } from '../model';
 import { formatPrice } from '../lib';
 import { getImageUrl } from '../../../../utils/imageUrl';
+import { getEffectivePrice } from '../../../../utils/discount';
 import './style.css';
 
 interface CartItemProps {
@@ -10,6 +11,7 @@ interface CartItemProps {
 
 export const CartItem = ({ item }: CartItemProps) => {
   const { updateItem, removeItem } = useCartActions();
+  const effectivePrice = getEffectivePrice(item.food);
 
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity <= 0) {
@@ -28,7 +30,7 @@ export const CartItem = ({ item }: CartItemProps) => {
       <img src={getImageUrl(item.food.image)} alt={item.food.name} className="cart-item-image" />
       <div className="cart-item-info">
         <h3 className="cart-item-name">{item.food.name}</h3>
-        <p className="cart-item-price">{formatPrice(item.food.price)}</p>
+        <p className="cart-item-price">{formatPrice(effectivePrice)}</p>
       </div>
       <div className="cart-item-controls">
         <div className="cart-item-quantity-controls">
@@ -53,7 +55,7 @@ export const CartItem = ({ item }: CartItemProps) => {
         </button>
       </div>
       <div className="cart-item-total">
-        {formatPrice(item.food.price * item.quantity)}
+        {formatPrice(effectivePrice * item.quantity)}
       </div>
     </div>
   );

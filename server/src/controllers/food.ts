@@ -4,6 +4,7 @@ import { NotFoundError } from "../errors/not-found.js";
 import { BadRequestError } from "../errors/bad-request.js";
 import { UnauthorizedError } from "../errors/unauthorized.js";
 import { invalidateFoodCache } from "../utils/cache.js";
+import type { FoodDiscount } from "../utils/discount.js";
 import { optimizeImage } from "../utils/imageOptimizer.js";
 import { getPopularFoodsByLocation } from "../services/analyticsService.js";
 import path from 'path';
@@ -256,6 +257,149 @@ export const createFood = async (req: Request, res: Response, next: NextFunction
         await food.save();
         await invalidateFoodCache();
         res.status(201).json({ food });
+    } catch (error) {
+        next(error);
+    }
+}
+
+type FoodLocation = (typeof AVAILABLE_LOCATIONS)[number];
+
+const parseLocations = (locations: unknown): FoodLocation[] => {
+    let parsed: unknown = locations;
+
+    if (typeof locations === 'string') {
+        try {
+            parsed = JSON.parse(locations);
+        } catch {
+            throw new BadRequestError('Некорректный список центров');
+        }
+    }
+
+    if (!Array.isArray(parsed)) {
+        throw new BadRequestError('Некорректный список центров');
+    }
+
+    const validLocations = parsed.filter(
+        (location): location is FoodLocation =>
+            typeof location === 'string' && (AVAILABLE_LOCATIONS as readonly string[]).includes(location)
+    );
+
+    if (validLocations.length === 0) {
+        throw new BadRequestError('Выберите хотя бы один центр');
+    }
+
+    return validLocations;
+};
+
+const MIN_DISCOUNT_PERCENT = 1;
+const MAX_DISCOUNT_PERCENT = 99;
+
+// Пустое значение = акции нет. Ожидается JSON: { percent, startDate, endDate }
+const parseDiscount = (discount: unknown): FoodDiscount | null => {
+    if (discount === undefined || discount === null || discount === '') {
+        return null;
+    }
+
+    let parsed: unknown = discount;
+    if (typeof discount === 'string') {
+        try {
+            parsed = JSON.parse(discount);
+        } catch {
+            throw new BadRequestError('Некорректные данные акции');
+        }
+    }
+
+    if (typeof parsed !== 'object' || parsed === null) {
+        throw new BadRequestError('Некорректные данные акции');
+    }
+
+    const { percent, startDate, endDate } = parsed as Record<string, unknown>;
+
+    const parsedPercent = Number(percent);
+    if (!Number.isInteger(parsedPercent) || parsedPercent < MIN_DISCOUNT_PERCENT || parsedPercent > MAX_DISCOUNT_PERCENT) {
+        throw new BadRequestError(`Процент скидки должен быть целым числом от ${MIN_DISCOUNT_PERCENT} до ${MAX_DISCOUNT_PERCENT}`);
+    }
+
+    const parsedStart = new Date(String(startDate));
+    const parsedEnd = new Date(String(endDate));
+    if (isNaN(parsedStart.getTime()) || isNaN(parsedEnd.getTime())) {
+        throw new BadRequestError('Укажите корректный период акции');
+    }
+
+    if (parsedEnd < parsedStart) {
+        throw new BadRequestError('Дата окончания акции не может быть раньше даты начала');
+    }
+
+    return { percent: parsedPercent, startDate: parsedStart, endDate: parsedEnd };
+};
+
+const serializeFood = (food: InstanceType<typeof Food>) => {
+    const foodObj: any = food.toObject();
+
+    if (food.stockByLocation) {
+        const stockByLocationObj: Record<string, boolean> = {};
+        food.stockByLocation.forEach((value, key) => {
+            stockByLocationObj[key] = value;
+        });
+        foodObj.stockByLocation = stockByLocationObj;
+    }
+
+    return foodObj;
+};
+
+export const updateFood = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        requireAdmin(res.locals.userRole);
+
+        const { id } = req.params;
+        const { name, price, category, locations, discount } = req.body;
+        const file = req.file;
+
+        if (!name || typeof name !== 'string' || !name.trim()) {
+            throw new BadRequestError('Название обязательно');
+        }
+
+        const parsedPrice = typeof price === 'string' ? parseFloat(price) : price;
+        if (typeof parsedPrice !== 'number' || isNaN(parsedPrice) || parsedPrice <= 0) {
+            throw new BadRequestError('Цена должна быть положительным числом');
+        }
+
+        if (!category || typeof category !== 'string' || !category.trim()) {
+            throw new BadRequestError('Категория обязательна');
+        }
+
+        const parsedLocations = parseLocations(locations);
+        const parsedDiscount = parseDiscount(discount);
+
+        const food = await Food.findById(id);
+        if (!food) {
+            throw new NotFoundError('Еда не найдена');
+        }
+
+        // Сохраняем текущее наличие для оставшихся центров, новые центры - в наличии
+        const stockByLocation = new Map<string, boolean>();
+        parsedLocations.forEach(location => {
+            const wasAvailable = food.locations?.includes(location);
+            stockByLocation.set(location, wasAvailable ? food.stockByLocation?.get(location) ?? true : true);
+        });
+
+        food.name = name.trim();
+        food.price = parsedPrice;
+        food.category = category.trim();
+        food.locations = parsedLocations;
+        food.set('discount', parsedDiscount);
+        food.stockByLocation = stockByLocation;
+        food.inStock = Array.from(stockByLocation.values()).some(stock => stock === true);
+
+        if (file) {
+            const fullImagePath = path.join(__dirname, '../../uploads/images', file.filename);
+            await optimizeImage(fullImagePath);
+            food.image = `/uploads/images/${file.filename}`;
+        }
+
+        await food.save();
+        await invalidateFoodCache();
+        res.status(200).json({ food: serializeFood(food) });
     } catch (error) {
         next(error);
     }

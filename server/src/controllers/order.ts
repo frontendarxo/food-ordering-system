@@ -11,6 +11,7 @@ import {
   publishOrderStatusUpdated,
 } from "../services/dashboardEvents.js";
 import { invalidateDashboardCache } from "../services/analyticsService.js";
+import { getEffectivePrice } from "../utils/discount.js";
 
 const requireAdminOrWorker = (userRole: string | undefined): void => {
   if (userRole !== 'admin' && userRole !== 'worker') {
@@ -69,7 +70,7 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
             return {
                 food: cartItem.food,
                 quantity: cartItem.quantity,
-                price: food.price
+                price: getEffectivePrice(food.price, food.discount)
             };
         });
 

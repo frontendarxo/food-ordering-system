@@ -32,6 +32,15 @@ export const foodSchema = new Schema({
         type: Map,
         of: Boolean,
         default: () => new Map([['шатой', true], ['гикало', true]])
+    },
+    // Акция: процент скидки и период действия
+    discount: {
+        type: {
+            percent: { type: Number, required: true, min: 1, max: 99 },
+            startDate: { type: Date, required: true },
+            endDate: { type: Date, required: true }
+        },
+        default: null
     }
 })
 

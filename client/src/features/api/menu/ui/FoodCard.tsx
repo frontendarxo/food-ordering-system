@@ -1,17 +1,20 @@
 import { useState, useEffect, useMemo } from 'react';
-import type { Food } from '../../../../types/food';
+import type { Food, Location } from '../../../../types/food';
 import { useCartActions } from '../../cart/model';
 import { formatPrice } from '../../cart/lib';
 import { useAuth } from '../../../../contexts/useAuth';
 import { useLocation } from '../../../../contexts/useLocation';
-import { updateFoodPrice, deleteFood, updateFoodStock, updateFoodName, updateFoodImage } from '../../../../api/menu';
+import { deleteFood, updateFoodStock } from '../../../../api/menu';
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
 import { fetchAllMenu, fetchPopularFoods } from '../../../../store/slices/menuSlice';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { FoodEditModal } from './FoodEditModal';
 import { QuantitySelector } from '../../cart/ui';
 import { getImageUrl } from '../../../../utils/imageUrl';
-import type { Location } from '../../../../types/food';
+import { getActiveDiscount, getDiscountedPrice, formatDiscountPeriod } from '../../../../utils/discount';
 import './style.css';
+
+const NOTIFICATION_DURATION_MS = 2000;
 
 interface FoodCardProps {
   food: Food;
@@ -23,18 +26,10 @@ export const FoodCard = ({ food }: FoodCardProps) => {
   const dispatch = useAppDispatch();
   const cartItems = useAppSelector((state) => state.cart.items);
   const [showNotification, setShowNotification] = useState(false);
-  const [isEditingPrice, setIsEditingPrice] = useState(false);
-  const [priceValue, setPriceValue] = useState(food.price.toString());
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [isUpdatingStock, setIsUpdatingStock] = useState(false);
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [nameValue, setNameValue] = useState(food.name);
-  const [isEditingImage, setIsEditingImage] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [isUpdatingName, setIsUpdatingName] = useState(false);
-  const [isUpdatingImage, setIsUpdatingImage] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   const [localStockByLocation, setLocalStockByLocation] = useState<Record<string, boolean>>({
@@ -62,18 +57,6 @@ export const FoodCard = ({ food }: FoodCardProps) => {
   }, [food.inStock, food.stockByLocation, isAdmin, isWorker, workerLocation, userLocation]);
 
   useEffect(() => {
-    if (!isEditingName) {
-      setNameValue(food.name);
-    }
-  }, [food.name, isEditingName]);
-
-  useEffect(() => {
-    if (!isEditingPrice) {
-      setPriceValue(food.price.toString());
-    }
-  }, [food.price, isEditingPrice]);
-
-  useEffect(() => {
     setImageLoading(true);
     setImageError(false);
   }, [food.image]);
@@ -88,6 +71,8 @@ export const FoodCard = ({ food }: FoodCardProps) => {
   const itemInCart = useMemo(() => {
     return cartItems.find(item => item.food._id === food._id);
   }, [cartItems, food._id]);
+
+  const activeDiscount = useMemo(() => getActiveDiscount(food), [food]);
 
   const getPopularLocationForRefresh = (): Location | null => {
     if (isWorker) {
@@ -117,7 +102,7 @@ export const FoodCard = ({ food }: FoodCardProps) => {
     setShowNotification(true);
     setTimeout(() => {
       setShowNotification(false);
-    }, 2000);
+    }, NOTIFICATION_DURATION_MS);
   };
 
   const handleIncreaseQuantity = () => {
@@ -136,35 +121,14 @@ export const FoodCard = ({ food }: FoodCardProps) => {
     }
   };
 
-  const handlePriceEdit = () => {
-    setIsEditingPrice(true);
-    setPriceValue(food.price.toString());
-  };
-
-  const handlePriceSave = async () => {
-    const newPrice = parseFloat(priceValue);
-    if (isNaN(newPrice) || newPrice <= 0) {
-      setPriceValue(food.price.toString());
-      setIsEditingPrice(false);
-      return;
-    }
-
-    try {
-      await updateFoodPrice(food._id, newPrice);
-      setIsEditingPrice(false);
-      await refreshMenuData();
-    } catch {
-      setPriceValue(food.price.toString());
-      setIsEditingPrice(false);
+  const handleCardClick = () => {
+    if (isAdmin) {
+      setShowEditModal(true);
     }
   };
 
-  const handlePriceCancel = () => {
-    setPriceValue(food.price.toString());
-    setIsEditingPrice(false);
-  };
-
-  const handleDeleteClick = () => {
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setShowDeleteModal(true);
   };
 
@@ -183,15 +147,13 @@ export const FoodCard = ({ food }: FoodCardProps) => {
     setShowDeleteModal(false);
   };
 
-  const handleStockToggle = async (location?: 'шатой' | 'гикало') => {
+  const handleWorkerStockToggle = async () => {
+    if (!workerLocation) return;
+
     setIsUpdatingStock(true);
     try {
-      // Для работника - инвертируем его локальный статус
-      const currentStatus = isWorker && workerLocation 
-        ? (food.stockByLocation?.[workerLocation] ?? food.inStock)
-        : food.inStock;
-      
-      await updateFoodStock(food._id, !currentStatus, location);
+      const currentStatus = food.stockByLocation?.[workerLocation] ?? food.inStock;
+      await updateFoodStock(food._id, !currentStatus, workerLocation);
       await refreshMenuData();
     } catch (error) {
       console.error('Ошибка обновления наличия:', error);
@@ -200,20 +162,19 @@ export const FoodCard = ({ food }: FoodCardProps) => {
     }
   };
 
-  const handleLocationToggle = async (location: 'шатой' | 'гикало') => {
+  const handleLocationToggle = async (location: Location) => {
     if (isUpdatingStock) return; // Предотвращаем двойной клик
-    
+
     setIsUpdatingStock(true);
     try {
-      const currentStatus = localStockByLocation[location];
-      const newStatus = !currentStatus;
-      
+      const newStatus = !localStockByLocation[location];
+
       // Оптимистичное обновление UI
       setLocalStockByLocation(prev => ({
         ...prev,
         [location]: newStatus
       }));
-      
+
       await updateFoodStock(food._id, newStatus, location);
       await refreshMenuData();
       setIsUpdatingStock(false);
@@ -227,86 +188,6 @@ export const FoodCard = ({ food }: FoodCardProps) => {
     }
   };
 
-  const handleNameEdit = () => {
-    setIsEditingName(true);
-    setNameValue(food.name);
-  };
-
-  const handleNameSave = async () => {
-    const trimmedName = nameValue.trim();
-    if (!trimmedName) {
-      setNameValue(food.name);
-      setIsEditingName(false);
-      return;
-    }
-
-    setIsUpdatingName(true);
-    try {
-      await updateFoodName(food._id, trimmedName);
-      setIsEditingName(false);
-      await refreshMenuData();
-    } catch {
-      setNameValue(food.name);
-      setIsEditingName(false);
-    } finally {
-      setIsUpdatingName(false);
-    }
-  };
-
-  const handleNameCancel = () => {
-    setNameValue(food.name);
-    setIsEditingName(false);
-  };
-
-  const handleImageEdit = () => {
-    setIsEditingImage(true);
-    setImageFile(null);
-    setImagePreview(null);
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        return;
-      }
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleImageSave = async () => {
-    if (!imageFile) {
-      setIsEditingImage(false);
-      return;
-    }
-
-    setIsUpdatingImage(true);
-    try {
-      await updateFoodImage(food._id, imageFile);
-      setIsEditingImage(false);
-      setImageFile(null);
-      setImagePreview(null);
-      await refreshMenuData();
-    } catch {
-      setIsEditingImage(false);
-      setImageFile(null);
-      setImagePreview(null);
-    } finally {
-      setIsUpdatingImage(false);
-    }
-  };
-
-  const handleImageCancel = () => {
-    setIsEditingImage(false);
-    setImageFile(null);
-    setImagePreview(null);
-  };
-
   const handleImageLoad = () => {
     setImageLoading(false);
     setImageError(false);
@@ -317,178 +198,44 @@ export const FoodCard = ({ food }: FoodCardProps) => {
     setImageError(true);
   };
 
-  const priceDisplay = isEditingPrice ? (
-    <div className="food-card-price-edit">
-      <input
-        type="number"
-        step="0.01"
-        min="0"
-        value={priceValue}
-        onChange={(e) => setPriceValue(e.target.value)}
-        className="food-card-price-input"
-        autoFocus
-      />
-      <div className="food-card-price-actions">
-        <button
-          className="food-card-price-save"
-          onClick={handlePriceSave}
-          aria-label="Сохранить"
-        >
-          ✓
-        </button>
-        <button
-          className="food-card-price-cancel"
-          onClick={handlePriceCancel}
-          aria-label="Отмена"
-        >
-          ✕
-        </button>
-      </div>
-    </div>
-  ) : (
-    <div className="food-card-price-wrapper">
-      <p className="food-card-price">{formatPrice(food.price)}</p>
-      {isAdmin && (
-        <button
-          className="food-card-edit-button"
-          onClick={handlePriceEdit}
-          aria-label="Изменить цену"
-        >
-          ✏️
-        </button>
-      )}
-    </div>
-  );
-
-  const imageDisplay = isEditingImage ? (
-    <div className="food-card-image-edit">
-      <input
-        type="file"
-        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-        onChange={handleImageChange}
-        className="food-card-image-input"
-        disabled={isUpdatingImage}
-      />
-      {imagePreview && (
-        <div className="food-card-image-preview">
-          <img src={imagePreview} alt="Предпросмотр" />
-        </div>
-      )}
-      <div className="food-card-image-actions">
-        <button
-          className="food-card-image-save"
-          onClick={handleImageSave}
-          disabled={isUpdatingImage || !imageFile}
-          aria-label="Сохранить"
-        >
-          {isUpdatingImage ? 'Сохранение...' : '✓ Сохранить'}
-        </button>
-        <button
-          className="food-card-image-cancel"
-          onClick={handleImageCancel}
-          disabled={isUpdatingImage}
-          aria-label="Отмена"
-        >
-          ✕ Отмена
-        </button>
-      </div>
-    </div>
-  ) : (
-    <div className="food-card-image-wrapper">
-      {imageLoading && !imageError && (
-        <div className="food-card-image-skeleton" />
-      )}
-      {imageError && (
-        <div className="food-card-image-error">
-          <span className="food-card-image-error-icon">📷</span>
-          <span className="food-card-image-error-text">Изображение не загружено</span>
-        </div>
-      )}
-      <img
-        src={getImageUrl(food.image)}
-        alt={food.name}
-        className={`food-card-image ${imageLoading || imageError ? 'food-card-image-hidden' : ''}`}
-        onLoad={handleImageLoad}
-        onError={handleImageError}
-      />
-      {!imageError && (
-        <div className="food-card-image-overlay">
-          {isEditingName ? (
-            <div className="food-card-image-title-edit">
-              <input
-                type="text"
-                value={nameValue}
-                onChange={(e) => setNameValue(e.target.value)}
-                className="food-card-image-title-input"
-                autoFocus
-                disabled={isUpdatingName}
-                onClick={(e) => e.stopPropagation()}
-              />
-              <div className="food-card-image-title-actions">
-                <button
-                  className="food-card-image-title-save"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNameSave();
-                  }}
-                  disabled={isUpdatingName}
-                  aria-label="Сохранить"
-                >
-                  ✓
-                </button>
-                <button
-                  className="food-card-image-title-cancel"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNameCancel();
-                  }}
-                  disabled={isUpdatingName}
-                  aria-label="Отмена"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <h3 className="food-card-image-title">{food.name}</h3>
-              {isAdmin && (
-                <button
-                  className="food-card-image-title-edit-button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNameEdit();
-                  }}
-                  aria-label="Изменить название"
-                >
-                  ✏️
-                </button>
-              )}
-            </>
-          )}
-        </div>
-      )}
-      {isAdmin && (
-        <button
-          className="food-card-image-edit-button"
-          onClick={handleImageEdit}
-          aria-label="Изменить изображение"
-        >
-          ✏️
-        </button>
-      )}
-    </div>
-  );
-
   return (
     <>
       <div
         className={`food-card ${!actualInStock ? 'food-card-out-of-stock' : ''} ${
-          isEditingImage ? 'food-card-editing-image' : ''
+          isAdmin ? 'food-card-clickable' : ''
         }`}
+        onClick={handleCardClick}
       >
-        {imageDisplay}
-        {isAdmin && !isEditingImage && (
+        <div className="food-card-image-wrapper">
+          {imageLoading && !imageError && (
+            <div className="food-card-image-skeleton" />
+          )}
+          {imageError && (
+            <div className="food-card-image-error">
+              <span className="food-card-image-error-icon">📷</span>
+              <span className="food-card-image-error-text">Изображение не загружено</span>
+            </div>
+          )}
+          <img
+            src={getImageUrl(food.image)}
+            alt={food.name}
+            className={`food-card-image ${imageLoading || imageError ? 'food-card-image-hidden' : ''}`}
+            onLoad={handleImageLoad}
+            onError={handleImageError}
+          />
+          {activeDiscount && (
+            <div className="food-card-discount-badge">
+              <span className="food-card-discount-percent">−{activeDiscount.percent}%</span>
+              <span className="food-card-discount-period">{formatDiscountPeriod(activeDiscount)}</span>
+            </div>
+          )}
+          {!imageError && (
+            <div className="food-card-image-overlay">
+              <h3 className="food-card-image-title">{food.name}</h3>
+            </div>
+          )}
+        </div>
+        {isAdmin && (
           <button
             className="food-card-delete-button"
             onClick={handleDeleteClick}
@@ -500,22 +247,33 @@ export const FoodCard = ({ food }: FoodCardProps) => {
         )}
         <div className="food-card-info">
           <h3 className="food-card-name-inline">{food.name}</h3>
-          {priceDisplay}
+          <div className="food-card-price-wrapper">
+            {activeDiscount ? (
+              <>
+                <p className="food-card-price food-card-price-discounted">
+                  {formatPrice(getDiscountedPrice(food.price, activeDiscount.percent))}
+                </p>
+                <s className="food-card-price-original">{formatPrice(food.price)}</s>
+              </>
+            ) : (
+              <p className="food-card-price">{formatPrice(food.price)}</p>
+            )}
+          </div>
           {!isAdmin && !isWorker && !actualInStock && <p className="food-card-status">Нет в наличии</p>}
-          
+
           {/* Работник: видит статус только своего центра */}
           {isWorker && workerLocation && (
             <label
               className={`food-card-stock-toggle ${
-                (food.stockByLocation?.[workerLocation] ?? food.inStock) 
-                  ? 'food-card-stock-toggle-active' 
+                (food.stockByLocation?.[workerLocation] ?? food.inStock)
+                  ? 'food-card-stock-toggle-active'
                   : 'food-card-stock-toggle-inactive'
               }`}
             >
               <input
                 type="checkbox"
                 checked={food.stockByLocation?.[workerLocation] ?? food.inStock}
-                onChange={() => handleStockToggle(workerLocation)}
+                onChange={handleWorkerStockToggle}
                 disabled={isUpdatingStock}
               />
               <span className="food-card-stock-label">
@@ -527,14 +285,17 @@ export const FoodCard = ({ food }: FoodCardProps) => {
               </span>
             </label>
           )}
-          
+
           {/* Админ: видит статус по всем центрам */}
           {isAdmin && (
             <div className="food-card-stock-admin">
               <div className="food-card-stock-locations">
                 <button
                   className={`food-card-stock-location ${localStockByLocation['шатой'] ? 'in-stock' : 'out-stock'}`}
-                  onClick={() => handleLocationToggle('шатой')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLocationToggle('шатой');
+                  }}
                   disabled={isUpdatingStock}
                   title="Нажмите для переключения наличия в Шатой"
                 >
@@ -545,7 +306,10 @@ export const FoodCard = ({ food }: FoodCardProps) => {
                 </button>
                 <button
                   className={`food-card-stock-location ${localStockByLocation['гикало'] ? 'in-stock' : 'out-stock'}`}
-                  onClick={() => handleLocationToggle('гикало')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLocationToggle('гикало');
+                  }}
                   disabled={isUpdatingStock}
                   title="Нажмите для переключения наличия в Гикало"
                 >
@@ -577,6 +341,13 @@ export const FoodCard = ({ food }: FoodCardProps) => {
           {food.name} добавлено
         </div>
       )}
+      {isAdmin && (
+        <FoodEditModal
+          isOpen={showEditModal}
+          food={food}
+          onClose={() => setShowEditModal(false)}
+        />
+      )}
       <DeleteConfirmModal
         isOpen={showDeleteModal}
         foodName={food.name}
@@ -587,4 +358,3 @@ export const FoodCard = ({ food }: FoodCardProps) => {
     </>
   );
 };
-

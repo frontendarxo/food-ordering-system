@@ -63,7 +63,7 @@
 
 .worker-orders {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
   gap: 20px;
   width: 100%;
 }
@@ -116,4 +116,23 @@
   outline: none;
   border-color: #8A1538;
   box-shadow: 0 0 0 3px rgba(138, 21, 56, 0.1);
+}
+
+@media (max-width: 480px) {
+  .worker-page {
+    padding: 12px;
+  }
+
+  .worker-order-item {
+    padding: 16px;
+  }
+
+  .worker-order-actions label {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .worker-order-actions select {
+    width: 100%;
+  }
 }

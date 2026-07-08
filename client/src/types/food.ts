@@ -1,5 +1,11 @@
 export type Location = 'шатой' | 'гикало';
 
+export interface Discount {
+  percent: number;
+  startDate: string;
+  endDate: string;
+}
+
 export interface Food {
   _id: string;
   name: string;
@@ -9,6 +15,7 @@ export interface Food {
   inStock: boolean;
   locations?: Location[];
   stockByLocation?: Record<Location, boolean>;
+  discount?: Discount | null;
 }
 
 export interface CartItem {
